@@ -116,8 +116,8 @@ Could tier (only if Day 8 exits early): multi-Freelancer bidding on one Brief; d
 
 | Risk | Mitigation |
 |---|---|
-| Partial capture + `final_capture` doesn't release remainder in sandbox | Day-1 spike; fallback = capture then void remainder. |
-| Payouts disabled / sandbox balance empty | Day-1 spike; top up sandbox business balance. |
+| ~~Partial capture + `final_capture` doesn't release remainder in sandbox~~ | **Resolved Oct 31:** remainder released; void afterwards → `PREVIOUSLY_CAPTURED`. |
+| ~~Payouts disabled / sandbox balance empty~~ | **Resolved Oct 31:** payout reached SUCCESS. Payout to the app's own business account is DENIED → Settlement needs a `payout_failed` state. |
 | Remote PayPal MCP exposes fewer tools | Fall back to calling `@paypal/agent-toolkit` core functions directly (no `ai@4` adapter). |
 | Negotiation doesn't converge / looks fake | Code-enforced Mandates, concession heuristic in prompts, seeded Mandates with real overlap for the demo. |
 | LLM cost from public demo | Per-IP rate limit on AI routes; cap Deals per persona per hour. |

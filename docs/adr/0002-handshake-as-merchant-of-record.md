@@ -4,6 +4,7 @@ The Client's Hold is a PayPal Orders v2 `AUTHORIZE` order payable to Handshake's
 
 ## Consequences
 
-- Payouts are asynchronous, so Settlement has a "payout pending" state until PayPal reports SUCCESS.
+- Verified in sandbox (2026-10-31 spike): a partial capture with `final_capture: true` leaves the authorization `CAPTURED` and releases the remainder — a follow-up void is rejected with `PREVIOUSLY_CAPTURED`, so Settlement never needs a separate void after a partial capture.
+- Payouts are asynchronous (PENDING → SUCCESS in ~seconds in sandbox), so Settlement has a "payout pending" state, and a "payout failed" state carrying PayPal's reason (e.g. "Payment to self is not allowed") — capture can succeed while the payout fails.
 - Deal deadlines are capped at 72 hours so every capture lands inside the authorization's 3-day honor period; reauthorization is out of scope.
 - In production this path holds third-party funds; the intended production route is PayPal Multiparty.
