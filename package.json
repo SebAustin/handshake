@@ -12,7 +12,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "spike:paypal": "tsx --env-file=.env.local scripts/paypal-spike.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs migrate"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
