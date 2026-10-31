@@ -61,18 +61,12 @@ brief_drafted → criteria_approved → negotiating ─┬→ agreed → hold_pe
 
 Every transition is a function `(deal, event) → deal | error` (pure, immutable, unit-tested). Side effects (PayPal calls) happen only in the settlement executor after a successful transition, with **idempotency keys** (`PayPal-Request-Id` = `dealId:action`).
 
-### Data model (sketch)
+### Data model (as built, `src/db/schema.ts`)
 
-- `deals` — id, state, brief, price_cents, deadline_at, protocol_version, timestamps
-- `criteria` — deal_id, ordinal, text, weight_bp (basis points, Σ = 10 000)
-- `mandates` — deal_id, role, budget_ceiling_cents | min_rate_cents, max_deadline_h, locked_criteria
-- `negotiation_messages` — deal_id, round, from_role, kind (offer|counter|accept|walk_away), terms jsonb, rationale, mandate_check jsonb
-- `holds` — deal_id, order_id, authorization_id, amount_cents, status
-- `deliveries` — deal_id, attempt (1|2), content, created_at
-- `verdicts` — deal_id, delivery_id, per-criterion results jsonb, model, created_at
-- `settlements` — deal_id, kind (full|partial|void), captured_cents, fee_cents, payout_cents, capture_id
-- `payouts` — settlement_id, batch_id, item_id, status
-- `ledger_events` — append-only audit of every money/state event (feeds Ledger + reconciliation)
+- `deals` — the whole Deal aggregate in one row: scalar `state`/`brief`/`delivery_attempt`, jsonb parts (criteria, mandates, terms, hold, verdict, plan, contest, capture, payout), `version` for optimistic concurrency. Rewritten whole on each transition.
+- `negotiation_messages` — append-only: round, from_role, kind (offer|counter|accept|walk_away), terms, rationale, code-found Mandate violations, accepted
+- `deliveries` — deal_id, attempt (1|2, unique per Deal), content
+- `ledger_events` — append-only audit of every state change and PayPal call (from/to state, payload, PayPal reference); feeds the Ledger and reconciliation
 
 ### Key flows
 
