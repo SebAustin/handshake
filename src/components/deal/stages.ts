@@ -60,6 +60,12 @@ export function nextStep(deal: Deal, persona: Role): string {
       return deal.terms
         ? `Agreed at ${formatCents(deal.terms.priceCents)} within ${deal.terms.deadlineHours} hours. ${mine ? "Place the Hold to start the work." : "Waiting for Maya to place the Hold."}`
         : "Agreed.";
+    case "hold_pending":
+      return mine ? "Approve the PayPal authorization to place the Hold." : "Maya is approving the Hold in PayPal.";
+    case "held":
+      return deal.terms
+        ? `${formatCents(deal.terms.priceCents)} is held by PayPal. ${mine ? "Waiting for Dev's Delivery." : `Deliver within ${deal.terms.deadlineHours} hours.`}`
+        : "Held.";
     default:
       return `Stage: ${stageOf(deal).label}.`;
   }

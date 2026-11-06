@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CriteriaPanel } from "@/components/deal/CriteriaPanel";
 import { DealSummary } from "@/components/deal/DealSummary";
+import { HoldPanel } from "@/components/deal/HoldPanel";
 import { MandatePanel } from "@/components/deal/MandatePanel";
 import { NegotiationView } from "@/components/deal/NegotiationView";
 import { StageStrip } from "@/components/deal/StageStrip";
@@ -11,6 +12,7 @@ import type { Role } from "@/deals/model";
 import type { Deal } from "@/deals/state-machine";
 import { dealTitle } from "@/lib/format";
 import { getPersona, getServices } from "@/server/context";
+import { getPayPalClientId } from "@/server/paypal";
 
 export default function DealPage({ params }: PageProps<"/deals/[id]">) {
   return (
@@ -60,8 +62,20 @@ function StagePanel({ deal, persona, messages }: { deal: Deal; persona: Role; me
     : undefined;
   const bothSet = Boolean(deal.pendingMandates?.client && deal.pendingMandates?.freelancer);
 
+  const hasHold = deal.terms && !["criteria_approved", "negotiating", "no_deal"].includes(deal.state);
+
   return (
     <>
+      {hasHold && deal.terms && (
+        <HoldPanel
+          dealId={deal.id}
+          state={deal.state}
+          priceCents={deal.terms.priceCents}
+          clientId={getPayPalClientId()}
+          canPay={persona === "client"}
+          authorizationId={deal.hold?.authorizationId}
+        />
+      )}
       {deal.state === "criteria_approved" && (
         <MandatePanel
           dealId={deal.id}

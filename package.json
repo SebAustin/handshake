@@ -15,11 +15,13 @@
     "db:migrate": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs migrate",
     "test:int": "VITEST_INTEGRATION=1 node --env-file=.env.local ./node_modules/vitest/vitest.mjs run",
     "check:criteria": "tsx --env-file=.env.local scripts/check-criteria.ts",
-    "check:agents": "tsx --env-file=.env.local scripts/check-agents.ts"
+    "check:agents": "tsx --env-file=.env.local scripts/check-agents.ts",
+    "inspect:deal": "tsx --env-file=.env.local scripts/inspect-deal.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.98",
     "@neondatabase/serverless": "^1.2.0",
+    "@paypal/paypal-js": "11.3.0",
     "ai": "^7.0.164",
     "drizzle-orm": "^0.45.4",
     "next": "16.4.3",
