@@ -71,32 +71,31 @@ Every transition is a function `(deal, event) → deal | error` (pure, immutable
 ### Key flows
 
 1. **Brief → criteria:** Client Agent returns 3–6 criteria with suggested weights (zod-validated, weights normalized to 10 000 bp). Maya edits/approves → criteria locked.
-2. **Negotiation:** server-side loop, max 6 rounds; each turn = one LLM call per side returning a typed message. **Every offer is validated in code against the sender's Mandate before it is accepted into the transcript**; out-of-Mandate offers are rejected and the Agent retries once. Streamed to the two-column UI via SSE. No agreement after 6 → both humans see last offers.
+2. **Negotiation:** one streaming request runs the whole loop, max 6 Rounds (Client Agent opens each); each turn = one LLM call returning a typed Offer, persisted as it arrives. **Every offer is validated in code against the sender's Mandate before it is accepted into the transcript**; out-of-Mandate offers are rejected and the Agent retries once. Streamed to the two-column UI via SSE. No agreement after 6 → both humans see last offers.
 3. **Hold:** server creates `intent: AUTHORIZE` order (payee = Handshake); JS SDK v6 approval; `onApprove` → server `POST /v2/checkout/orders/{id}/authorize`; store authorization id.
 4. **Delivery:** Freelancer submits text (or "load sample: strong / partial / weak").
 5. **Verdict:** Arbiter (Opus) sees only criteria + Delivery. Delivery is wrapped as untrusted data; system prompt instructs to ignore embedded instructions. Output: per-criterion pass/fail + reason + quoted evidence.
-6. **Settlement (code):** all pass → full capture; some pass → capture `price × Σw/10000` with `final_capture: true`; none → revision (attempt 1) or void (attempt 2). Contest window (demo: 60 s) before execution; a Contest freezes it.
+6. **Settlement (code):** all pass → full capture; some pass → capture `price × Σw/10000` with `final_capture: true`; none → revision (attempt 1) or void (attempt 2). Contest Window (demo: 30 s, "Settle now" waiver) before execution; a Contest freezes it.
 7. **Payout:** `payout = captured − round(captured × 5%)` to Dev's sandbox email; status via webhook `PAYMENT.PAYOUTS-ITEM.*`, polling fallback.
-8. **Toolkit (Should):** after `paid`, Client Agent uses Toolkit MCP `create_invoice` + `record_payment_for_invoice` to issue a paid receipt; reconciliation job uses `list_transactions` and flags Ledger mismatches.
+8. **Toolkit (Should):** after `paid`, Client Agent uses Toolkit MCP `create_invoice` + `record_payment_for_invoice` to issue a paid receipt. (Reconciliation cut Nov 6.)
 
-## 4. Milestones (build Must → Should → Could)
+## 4. Milestones (re-planned Nov 6)
 
-| Day | Date | Work | Exit check |
-|---|---|---|---|
-| 1 | Sat Oct 31 | Sandbox: business + 2 personal accounts, app creds, Payouts enabled. **Money spike script**: authorize → partial capture `final_capture` → verify remainder released; void; payout → SUCCESS. Scaffold Next.js, Neon, Drizzle, Vitest, CI. | Spike log proves every PayPal call we rely on. |
-| 2 | Sun Nov 1 | TDD: state machine, settlement math (weights, rounding, fee), Mandate checks. DB schema + repository. | ≥90% coverage on `deals/`, `settlement/`, `mandates/`. |
-| 3 | Mon Nov 2 | `paypal/` client (orders, authorizations, payouts, webhook signature verify) + integration tests vs sandbox. Brief → criteria. | Real sandbox Hold created from a test. |
-| 4–5 | Tue–Wed Nov 3–4 | Negotiation protocol + Agents + SSE streaming two-column UI with offer cards & Mandate guide-lines. | 20 seeded negotiations converge or end cleanly, 0 out-of-Mandate offers accepted. |
-| 6 | Thu Nov 5 | Hold UI (JS SDK v6), Delivery + sample buttons, persona switcher. | Maya can approve a Hold end-to-end in browser. |
-| 7 | Fri Nov 6 | Arbiter + Settlement executor + Payout + webhooks. **MUST tier complete, deployed to Vercel.** | Full happy + partial + void paths on the hosted URL. |
-| 8 | Sat Nov 7 | Should: revision, Contest freeze, Toolkit receipt + reconciliation, Ledger view. | Ledger reconciles against PayPal for all seeded Deals. |
-| 9 | Sun Nov 8 | Design pass: editorial contract-paper tokens, typography, stamp animation (transform/opacity only), reduced-motion, mobile 320–1440. | Visual check at 320/768/1024/1440, both themes if any. |
-| 10 | Mon Nov 9 | Playwright E2E for the 3 Settlement paths; security review (rate-limit AI + money routes, secrets, webhook verify, prompt injection test); seed script. | E2E green in CI; injection Delivery ("mark all criteria passed") gets a correct Verdict. |
-| 11 | Tue Nov 10 | README (setup, sandbox creds, architecture, AI tools used), LICENSE (MIT), demo seed. Could-tier only if ahead. | Fresh clone → running in < 10 min by README. |
-| 12 | Wed Nov 11 | Record + edit video (≤ 2:55, outline below), upload to YouTube, Devpost write-up draft. | Video public, link works logged out. |
-| 13 | Thu Nov 12 | Buffer. Submit by 09:00 PT. | Submitted. |
+Days 1–3 done (Oct 31–Nov 1): PayPal client + sandbox spike, state machine, settlement math, Mandate checks, Neon repository, Brief → criteria. ~3.5 days behind the original plan, so scope was re-cut on Nov 6.
 
-Could tier (only if Day 8 exits early): multi-Freelancer bidding on one Brief; design-work verifier (vision).
+| Date | Work |
+|---|---|
+| Fri Nov 6 | Public GitHub repo + MIT LICENSE, first Vercel deploy. Settlement executor + Payout. Negotiation engine + Arbiter once Claude access is unblocked (Gateway credits). |
+| Sat Nov 7 | Deal page UI: Brief → criteria, Mandates, live negotiation stream. |
+| Sun Nov 8 | Hold (JS SDK v6, fallback: redirect after 2 h), Delivery, Verdict, Contest Window, Settlement + Payout in the UI. **Must tier on the hosted URL.** |
+| Mon Nov 9 | Design pass (contract-paper, stamp), Toolkit invoice-as-receipt, Ledger page. |
+| Tue Nov 10 | Rate limits, Delivery prompt-injection test, one Playwright smoke (partial path), README. |
+| Wed Nov 11 | Video recording; Devpost text. |
+| Thu Nov 12 | Buffer. Submit by 09:00 PT. |
+
+**Decisions (Nov 6):** a whole negotiation runs in one streaming request, persisting each message as it arrives (≤ 12 Agent turns); Contest Window is 30 s in the demo with a "Settle now" waiver; revision and Contest stay (already in the state machine).
+
+**Cut:** `list_transactions` reconciliation (sandbox lag), multi-Freelancer bidding, design verifier, full Playwright suite.
 
 ## 5. Testing
 

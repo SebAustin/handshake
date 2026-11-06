@@ -34,6 +34,14 @@ _Avoid_: Job post, request, description
 The agreement both Agents reach: scope, price, Acceptance Criteria (with weights), and deadline.
 _Avoid_: Contract, job, gig, order
 
+**Offer**:
+A complete set of proposed Terms — price, deadline and criterion weights — sent by one Agent during negotiation.
+_Avoid_: Bid, proposal, quote
+
+**Round**:
+One Offer from each Agent; the Client's Agent opens every Round. A negotiation has at most six.
+_Avoid_: Turn, exchange, iteration
+
 **Acceptance Criterion**:
 One checkable condition the Delivery must meet, carrying a weight that determines its share of the price.
 _Avoid_: Requirement, spec item
@@ -69,6 +77,10 @@ _Avoid_: Submission, deliverable, output
 **Verdict**:
 The Arbiter's judgment of a Delivery against each Acceptance Criterion — pass, partial, or fail — with reasons.
 _Avoid_: Review, grade, score, decision
+
+**Contest Window**:
+The short period after a Verdict during which either person may Contest; Settlement happens only once it closes or both people waive it.
+_Avoid_: Grace period, cooling-off
 
 **Contest**:
 A person's objection to a Verdict within the contest window; it freezes Settlement and hands the Deal to a human.
