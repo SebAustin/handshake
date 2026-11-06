@@ -64,7 +64,7 @@ Every transition is a function `(deal, event) → deal | error` (pure, immutable
 ### Data model (as built, `src/db/schema.ts`)
 
 - `deals` — the whole Deal aggregate in one row: scalar `state`/`brief`/`delivery_attempt`, jsonb parts (criteria, mandates, terms, hold, verdict, plan, contest, capture, payout), `version` for optimistic concurrency. Rewritten whole on each transition.
-- `negotiation_messages` — append-only: round, from_role, kind (offer|counter|accept|walk_away), terms, rationale, code-found Mandate violations, accepted
+- `negotiation_messages` — append-only: round, from_role, kind (offer|accept|walk_away), terms, rationale, code-found Mandate violations, accepted
 - `deliveries` — deal_id, attempt (1|2, unique per Deal), content
 - `ledger_events` — append-only audit of every state change and PayPal call (from/to state, payload, PayPal reference); feeds the Ledger and reconciliation
 

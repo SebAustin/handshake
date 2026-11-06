@@ -14,7 +14,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs migrate",
     "test:int": "VITEST_INTEGRATION=1 node --env-file=.env.local ./node_modules/vitest/vitest.mjs run",
-    "check:criteria": "tsx --env-file=.env.local scripts/check-criteria.ts"
+    "check:criteria": "tsx --env-file=.env.local scripts/check-criteria.ts",
+    "check:agents": "tsx --env-file=.env.local scripts/check-agents.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import type { Deal, DealState } from "@/deals/state-machine";
 import type { Role, Terms } from "@/deals/model";
-import type { Violation } from "@/mandates/check";
+import type { NegotiationMessage } from "@/negotiation/protocol";
 
 /**
  * The Deal aggregate is stored as one row (scalar state + jsonb parts) and
@@ -55,11 +55,11 @@ export const negotiationMessages = pgTable(
       .references(() => deals.id, { onDelete: "cascade" }),
     round: smallint("round").notNull(),
     fromRole: text("from_role").$type<Role>().notNull(),
-    kind: text("kind").$type<"offer" | "counter" | "accept" | "walk_away">().notNull(),
+    kind: text("kind").$type<NegotiationMessage["kind"]>().notNull(),
     terms: jsonb("terms").$type<Terms>(),
     rationale: text("rationale").notNull(),
-    /** Mandate violations found by code; a message with any is never shown to the other Agent. */
-    violations: jsonb("violations").$type<Violation[]>().notNull().default([]),
+    /** Problems found by code; a message with any is never shown to the other Agent. */
+    violations: jsonb("violations").$type<NegotiationMessage["violations"]>().notNull().default([]),
     accepted: boolean("accepted").notNull(),
     createdAt: createdAt(),
   },
