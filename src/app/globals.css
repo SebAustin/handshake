@@ -116,7 +116,30 @@ body {
   }
 }
 
+/* The Settlement stamp lands like ink on paper: a quick press, slightly over, then settles. */
+.stamp {
+  animation: stamp 420ms var(--ease-out) both;
+  transform-origin: center;
+}
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: rotate(-3deg) scale(1.6);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-3deg) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-3deg) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .stamp {
+    animation: fade 200ms ease both;
+  }
   .rise {
     animation: fade 200ms ease both;
   }

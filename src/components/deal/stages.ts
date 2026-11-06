@@ -66,6 +66,26 @@ export function nextStep(deal: Deal, persona: Role): string {
       return deal.terms
         ? `${formatCents(deal.terms.priceCents)} is held by PayPal. ${mine ? "Waiting for Dev's Delivery." : `Deliver within ${deal.terms.deadlineHours} hours.`}`
         : "Held.";
+    case "revision_requested":
+      return mine ? "The Delivery passed nothing. Dev gets one revision." : "Your Delivery passed nothing. You have one revision.";
+    case "delivered":
+      return "The neutral Arbiter is judging the Delivery.";
+    case "judged":
+      return "The Verdict is in. Either side can contest before any money moves.";
+    case "contested":
+      return "The Verdict was contested. Settlement is frozen for a human to review.";
+    case "settling":
+      return "Settling with PayPal.";
+    case "payout_pending":
+      return "Captured. PayPal is paying Dev.";
+    case "paid":
+      return deal.plan && "payoutCents" in deal.plan
+        ? `Settled. Dev was paid ${formatCents(deal.plan.payoutCents)} through PayPal.`
+        : "Settled.";
+    case "payout_failed":
+      return "Captured, but PayPal declined the payout to Dev.";
+    case "voided":
+      return "No criteria passed twice. The Hold was voided; Maya paid nothing.";
     default:
       return `Stage: ${stageOf(deal).label}.`;
   }

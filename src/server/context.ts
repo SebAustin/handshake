@@ -3,13 +3,18 @@ import { cookies } from "next/headers";
 import { getDatabase } from "@/db/client";
 import type { Role } from "@/deals/model";
 import { createDealRepository } from "@/deals/repository";
+import { createDeliveryStore } from "@/deliveries/store";
 import { createTranscriptStore } from "@/negotiation/transcript";
 
 /** Server-side wiring shared by pages, actions and route handlers. */
 
 export function getServices() {
   const db = getDatabase();
-  return { deals: createDealRepository(db), transcript: createTranscriptStore(db) };
+  return {
+    deals: createDealRepository(db),
+    transcript: createTranscriptStore(db),
+    deliveries: createDeliveryStore(db),
+  };
 }
 
 export const PERSONA_COOKIE = "handshake-persona";

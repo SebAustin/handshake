@@ -52,6 +52,10 @@ export interface Deal {
   readonly hold?: { readonly orderId: string; readonly authorizationId?: string };
   readonly deliveryAttempt: 0 | 1 | 2;
   readonly verdict?: Verdict;
+  /** ISO time the Verdict was issued; the Contest Window runs from here. */
+  readonly verdictAt?: string;
+  /** Sides that waived their right to Contest the current Verdict. */
+  readonly waivers?: readonly Role[];
   readonly plan?: SettlementPlan;
   readonly contest?: { readonly by: Role; readonly reason: string };
   readonly capture?: { readonly captureId: string; readonly amountCents: number };
@@ -68,7 +72,8 @@ export type DealEvent =
   | { type: "HOLD_REQUESTED"; orderId: string }
   | { type: "HOLD_PLACED"; authorizationId: string; amountCents: number }
   | { type: "DELIVERY_SUBMITTED" }
-  | { type: "VERDICT_ISSUED"; verdict: Verdict }
+  | { type: "VERDICT_ISSUED"; verdict: Verdict; at?: string }
+  | { type: "CONTEST_WAIVED"; by: Role }
   | { type: "CONTEST_FILED"; by: Role; reason: string }
   | { type: "CONTEST_WINDOW_CLOSED" }
   | { type: "CAPTURED"; captureId: string; amountCents: number }
@@ -92,6 +97,7 @@ const ALLOWED_FROM: Record<DealEvent["type"], readonly DealState[]> = {
   DELIVERY_SUBMITTED: ["held", "revision_requested"],
   VERDICT_ISSUED: ["delivered"],
   CONTEST_FILED: ["judged"],
+  CONTEST_WAIVED: ["judged"],
   CONTEST_WINDOW_CLOSED: ["judged"],
   CAPTURED: ["settling"],
   HOLD_VOIDED: ["settling"],
@@ -182,7 +188,11 @@ function apply(deal: Deal, event: DealEvent): Deal {
       );
       const terms = required(deal.terms, "terms");
       const plan = planSettlement({ priceCents: terms.priceCents, weights: terms.weights, verdict: event.verdict });
-      return { ...deal, state: "judged", verdict: event.verdict, plan };
+      return { ...deal, state: "judged", verdict: event.verdict, plan, verdictAt: event.at, waivers: [] };
+    }
+    case "CONTEST_WAIVED": {
+      const waivers = deal.waivers ?? [];
+      return waivers.includes(event.by) ? deal : { ...deal, waivers: [...waivers, event.by] };
     }
     case "CONTEST_FILED":
       return { ...deal, state: "contested", contest: { by: event.by, reason: event.reason } };

@@ -289,3 +289,45 @@ describe("drafting and Mandates", () => {
     });
   });
 });
+
+describe("Contest Window", () => {
+  const judgedAt = "2026-11-06T22:00:00.000Z";
+  const judged = () =>
+    run([
+      ...TO_HELD,
+      { type: "DELIVERY_SUBMITTED" },
+      { type: "VERDICT_ISSUED", verdict: verdict(1, [true, true, false]), at: judgedAt },
+    ]);
+
+  test("records when the Verdict was issued", () => {
+    expect(judged().verdictAt).toBe(judgedAt);
+  });
+
+  test("each side may waive its right to Contest, once", () => {
+    const waived = run(
+      [
+        { type: "CONTEST_WAIVED", by: "client" },
+        { type: "CONTEST_WAIVED", by: "client" },
+        { type: "CONTEST_WAIVED", by: "freelancer" },
+      ],
+      judged(),
+    );
+
+    expect(waived.state).toBe("judged");
+    expect(waived.waivers).toEqual(["client", "freelancer"]);
+  });
+
+  test("a new Verdict clears earlier waivers", () => {
+    const firstFail = run([
+      ...TO_HELD,
+      { type: "DELIVERY_SUBMITTED" },
+      { type: "VERDICT_ISSUED", verdict: verdict(1, [false, false, false]) },
+      { type: "CONTEST_WAIVED", by: "client" },
+      { type: "CONTEST_WINDOW_CLOSED" },
+      { type: "DELIVERY_SUBMITTED" },
+      { type: "VERDICT_ISSUED", verdict: verdict(2, [true, true, true]) },
+    ]);
+
+    expect(firstFail.waivers).toEqual([]);
+  });
+});

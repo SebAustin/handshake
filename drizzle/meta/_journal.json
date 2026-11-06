@@ -15,6 +15,13 @@
       "when": 1794000439914,
       "tag": "0001_drafts_and_pending_mandates",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794001819954,
+      "tag": "0002_contest_window",
+      "breakpoints": true
     }
   ]
 }

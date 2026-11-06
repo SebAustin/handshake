@@ -38,6 +38,8 @@ export const deals = pgTable(
     hold: jsonb("hold").$type<Deal["hold"]>(),
     deliveryAttempt: smallint("delivery_attempt").$type<Deal["deliveryAttempt"]>().notNull().default(0),
     verdict: jsonb("verdict").$type<Deal["verdict"]>(),
+    verdictAt: text("verdict_at"),
+    waivers: jsonb("waivers").$type<Deal["waivers"]>(),
     plan: jsonb("plan").$type<Deal["plan"]>(),
     contest: jsonb("contest").$type<Deal["contest"]>(),
     capture: jsonb("capture").$type<Deal["capture"]>(),
