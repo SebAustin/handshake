@@ -27,6 +27,7 @@ const CURRENCY = "USD";
 /** PayPal rejects invoice item names of 200 characters or more. */
 const ITEM_NAME_MAX = 120;
 const INVOICE_ID = /INV2-[A-Z0-9-]+/;
+const PAID_STATUSES = new Set(["PAID", "MARKED_AS_PAID"]);
 const RECEIPT_STATES = new Set<Deal["state"]>(["payout_pending", "paid", "payout_failed"]);
 
 /** The `create_invoice` arguments for a Deal's receipt: one line, for exactly what was captured. */
@@ -39,7 +40,7 @@ export function receiptInvoiceArgs(deal: Deal, invoiceDate: string): Record<stri
 
   return {
     currency_code: CURRENCY,
-    invoice_number: `HS-${deal.id}`,
+    invoice_number: receiptNumber(deal.id),
     invoice_date: invoiceDate,
     invoicer_business_name: "Handshake",
     reference: deal.id,
@@ -67,28 +68,54 @@ export async function issueReceipt(deps: ReceiptDeps, dealId: string): Promise<R
   if (!deal.capture || !RECEIPT_STATES.has(deal.state)) return { ok: false, error: "Nothing was captured, so there is nothing to receipt." };
 
   const today = deps.today();
-  const created = await deps.toolkit.call("create_invoice", receiptInvoiceArgs(deal, today));
-  const invoiceId = findInvoiceId(created);
-  if (!invoiceId) return { ok: false, error: "PayPal created the receipt but returned no invoice id." };
+  const invoiceNumber = receiptNumber(deal.id);
+  // Resumable: an earlier attempt may have stopped after any step, and PayPal refuses a second invoice with this number.
+  const existing = await findByNumber(deps.toolkit, invoiceNumber);
+  let invoiceId = existing?.id;
+  let status = existing?.status;
+  if (!invoiceId) {
+    invoiceId = findInvoiceId(await deps.toolkit.call("create_invoice", receiptInvoiceArgs(deal, today)));
+    if (!invoiceId) return { ok: false, error: "PayPal created the receipt but returned no invoice id." };
+    status = "DRAFT";
+  }
 
-  await deps.toolkit.call("send_invoice", { invoice_id: invoiceId, send_to_recipient: false });
-  await deps.toolkit.call("record_payment_for_invoice", {
-    invoice_id: invoiceId,
-    method: "PAYPAL",
-    payment_date: today,
-    amount: { currency_code: CURRENCY, value: centsToValue(deal.capture.amountCents) },
-    note: `PayPal capture ${deal.capture.captureId}`,
-  });
+  if (status === "DRAFT") {
+    await deps.toolkit.call("send_invoice", { invoice_id: invoiceId, send_to_recipient: false });
+  }
+  if (!PAID_STATUSES.has(status ?? "")) {
+    await deps.toolkit.call("record_payment_for_invoice", {
+      invoice_id: invoiceId,
+      method: "PAYPAL",
+      payment_date: today,
+      amount: { currency_code: CURRENCY, value: centsToValue(deal.capture.amountCents) },
+      note: `PayPal capture ${deal.capture.captureId}`,
+    });
+  }
   const invoice = readInvoice(await deps.toolkit.call("get_invoice", { invoice_id: invoiceId }));
 
   const receipt: Receipt = {
     invoiceId,
-    invoiceNumber: invoice.number ?? `HS-${deal.id}`,
+    invoiceNumber: invoice.number ?? invoiceNumber,
     status: invoice.status ?? "UNKNOWN",
     ...(invoice.viewUrl && { viewUrl: invoice.viewUrl }),
   };
   const applied = await deps.deals.applyEvent(dealId, { type: "RECEIPT_ISSUED", receipt }, { paypalRef: invoiceId });
   return applied.ok ? { ok: true, deal: applied.deal } : { ok: false, error: applied.error.message };
+}
+
+/** One receipt per Deal: the invoice number is derived from the Deal id (PayPal allows 25 characters). */
+function receiptNumber(dealId: string): string {
+  return `HS-${dealId}`;
+}
+
+async function findByNumber(toolkit: ToolkitClient, invoiceNumber: string): Promise<{ id: string; status?: string } | undefined> {
+  const found = asRecord(
+    await toolkit.call("search_invoicing", { resource_type: "invoice", invoice_filters: { invoice_number: invoiceNumber } }),
+  );
+  const items = Array.isArray(found.items) ? found.items.map(asRecord) : [];
+  const match = items.find((item) => asRecord(item.detail).invoice_number === invoiceNumber);
+  const id = stringOrUndefined(match?.id);
+  return id ? { id, status: stringOrUndefined(match?.status) } : undefined;
 }
 
 function findInvoiceId(created: unknown): string | undefined {

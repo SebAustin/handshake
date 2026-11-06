@@ -4,6 +4,7 @@
  *
  *   pnpm seed:deal agreed        # ready for a real PayPal Hold
  *   pnpm seed:deal held-no-money # placeholder Hold: only for paths that never call PayPal (Contest)
+ *   pnpm seed:deal judged-no-money # placeholder Hold, revision failed too: Contest Window open on a void Verdict
  */
 import { createDatabase } from "../src/db/client";
 import { createDealRepository } from "../src/deals/repository";
@@ -22,7 +23,8 @@ const TERMS = { priceCents: 10_000, deadlineHours: 30, weights: WEIGHTS };
 
 async function main(): Promise<void> {
   const until = process.argv[2];
-  if (until !== "agreed" && until !== "held-no-money") throw new Error("Usage: pnpm seed:deal agreed | held-no-money");
+  const modes = ["agreed", "held-no-money", "judged-no-money"];
+  if (!modes.includes(until ?? "")) throw new Error(`Usage: pnpm seed:deal ${modes.join(" | ")}`);
 
   const id = `d-${crypto.randomUUID().replaceAll("-", "").slice(0, 10)}`;
   const brief = until === "agreed" ? DEMO_BRIEF : `[Test, no money] ${DEMO_BRIEF}`;
@@ -33,10 +35,24 @@ async function main(): Promise<void> {
     { type: "NEGOTIATION_STARTED", client: DEMO_CLIENT_MANDATE, freelancer: DEMO_FREELANCER_MANDATE },
     { type: "AGREEMENT_REACHED", terms: TERMS },
   ];
-  if (until === "held-no-money") {
+  if (until !== "agreed") {
     events.push(
       { type: "HOLD_REQUESTED", orderId: "TESTNOPAYPAL0001" },
       { type: "HOLD_PLACED", authorizationId: "TESTNOPAYPAL0001", amountCents: TERMS.priceCents },
+    );
+  }
+
+  if (until === "judged-no-money") {
+    const failedAll = (attempt: 1 | 2) => ({
+      attempt,
+      results: CRITERIA.map((c) => ({ criterionId: c.id, passed: false, reason: "Seeded: not met.", evidence: "" })),
+    });
+    events.push(
+      { type: "DELIVERY_SUBMITTED" },
+      { type: "VERDICT_ISSUED", verdict: failedAll(1), at: new Date(Date.now() - 60_000).toISOString() },
+      { type: "CONTEST_WINDOW_CLOSED" },
+      { type: "DELIVERY_SUBMITTED" },
+      { type: "VERDICT_ISSUED", verdict: failedAll(2), at: new Date().toISOString() },
     );
   }
 

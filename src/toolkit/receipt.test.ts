@@ -40,6 +40,7 @@ const capturedPartial = () => dealIn([true, false], [{ type: "CAPTURED", capture
 
 function fakeToolkit(overrides: Partial<Record<string, unknown>> = {}): ToolkitClient & { call: ReturnType<typeof vi.fn> } {
   const responses: Record<string, unknown> = {
+    search_invoicing: { items: [] },
     create_invoice: { rel: "self", href: "https://api.sandbox.paypal.com/v2/invoicing/invoices/INV2-AAAA-BBBB", method: "GET" },
     send_invoice: { rel: "payer-view", href: "https://www.sandbox.paypal.com/invoice/p/#INV2-AAAA-BBBB" },
     record_payment_for_invoice: { payment_id: "EXTR-1" },
@@ -91,6 +92,7 @@ describe("issueReceipt", () => {
 
     expect(result.ok).toBe(true);
     expect(toolkit.call.mock.calls.map(([name]) => name)).toEqual([
+      "search_invoicing",
       "create_invoice",
       "send_invoice",
       "record_payment_for_invoice",
@@ -109,6 +111,35 @@ describe("issueReceipt", () => {
       viewUrl: "https://www.sandbox.paypal.com/invoice/p/#X",
     });
     expect(saved?.state).toBe("payout_pending");
+  });
+
+  test("looks the receipt up by its invoice number before creating one", async () => {
+    const toolkit = fakeToolkit();
+    await issueReceipt({ deals: createMemoryDeals([capturedPartial()]), toolkit, today: () => "2026-11-09" }, "d-abcdef1234");
+    expect(toolkit.call).toHaveBeenNthCalledWith(1, "search_invoicing", {
+      resource_type: "invoice",
+      invoice_filters: { invoice_number: "HS-d-abcdef1234" },
+    });
+  });
+
+  test.each([
+    ["DRAFT", ["search_invoicing", "send_invoice", "record_payment_for_invoice", "get_invoice"]],
+    ["SENT", ["search_invoicing", "record_payment_for_invoice", "get_invoice"]],
+    ["MARKED_AS_PAID", ["search_invoicing", "get_invoice"]],
+  ])("resumes an earlier attempt that left the invoice %s", async (status, calls) => {
+    const toolkit = fakeToolkit({ search_invoicing: {
+        items: [
+          { id: "INV2-OTHER", status: "PAID", detail: { invoice_number: "HS-d-zzzzzzzzzz" } },
+          { id: "INV2-AAAA-BBBB", status, detail: { invoice_number: "HS-d-abcdef1234" } },
+        ],
+      } });
+    const deals = createMemoryDeals([capturedPartial()]);
+
+    const result = await issueReceipt({ deals, toolkit, today: () => "2026-11-09" }, "d-abcdef1234");
+
+    expect(result.ok).toBe(true);
+    expect(toolkit.call.mock.calls.map(([name]) => name)).toEqual(calls);
+    expect((await deals.get("d-abcdef1234"))?.deal.receipt?.invoiceId).toBe("INV2-AAAA-BBBB");
   });
 
   test("does nothing twice", async () => {

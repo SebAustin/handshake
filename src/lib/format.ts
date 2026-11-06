@@ -13,10 +13,12 @@ export function formatPercent(bp: number): string {
 /** A Deal's title: the Brief's first sentence, shortened to fit two lines of the title row. */
 /** A Deal's name: the Brief's first clause, without "I need". A title, not a sentence. */
 export function dealTitle(brief: string, maxLength = 48): string {
-  const sentence = brief.split(/(?<=[.!?])\s/)[0]?.trim() ?? brief;
+  // A leading tag such as "[Test, no money]" is kept whole and not mistaken for the first clause.
+  const [, tag = "", rest = brief] = /^(\[[^\]]*\]\s*)?([\s\S]*)$/.exec(brief.trim()) ?? [];
+  const sentence = rest.split(/(?<=[.!?])\s/)[0]?.trim() ?? rest;
   const clause = sentence.split(/[,;:—–]\s/)[0] ?? sentence;
   const cleaned = clause.replace(/^I need\s+/i, "").replace(/[.!?]$/, "");
-  const titled = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+  const titled = tag + cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
   return titled.length <= maxLength ? titled : `${titled.slice(0, maxLength - 1).trimEnd()}…`;
 }
 

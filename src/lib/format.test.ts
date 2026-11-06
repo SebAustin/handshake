@@ -18,6 +18,9 @@ describe("format", () => {
       "Landing page copy for Brewlab",
     );
     expect(dealTitle("I need a tagline. Short.")).toBe("A tagline");
+    expect(dealTitle("[Test, no money] I need landing page copy for Brewlab, a coffee subscription.")).toBe(
+      "[Test, no money] Landing page copy for Brewlab",
+    );
     expect(dealTitle("x".repeat(100)).length).toBe(48);
   });
 

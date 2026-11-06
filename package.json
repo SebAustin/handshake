@@ -17,7 +17,8 @@
     "check:criteria": "tsx --env-file=.env.local scripts/check-criteria.ts",
     "check:agents": "tsx --env-file=.env.local scripts/check-agents.ts",
     "inspect:deal": "tsx --env-file=.env.local scripts/inspect-deal.ts",
-    "seed:deal": "tsx --env-file=.env.local scripts/seed-deal.ts"
+    "seed:deal": "tsx --env-file=.env.local scripts/seed-deal.ts",
+    "clean:test-deals": "tsx --env-file=.env.local scripts/clean-test-deals.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.98",

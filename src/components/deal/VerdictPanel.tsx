@@ -106,6 +106,7 @@ function ContestWindow({ dealId, persona, closesAt, waivers }: VerdictPanelProps
   const [isContesting, setIsContesting] = useState(false);
   const [contestState, contest, isSending] = useActionState<WorkState, FormData>(contestAction.bind(null, dealId), {});
   const closeRequested = useRef(false);
+  const [settleError, setSettleError] = useState<string>();
   const hasWaived = waivers.includes(persona);
   const other = persona === "client" ? "Dev" : "Maya";
 
@@ -115,7 +116,7 @@ function ContestWindow({ dealId, persona, closesAt, waivers }: VerdictPanelProps
       setRemainingMs(left);
       if (left === 0 && !closeRequested.current) {
         closeRequested.current = true;
-        startClosing(async () => void (await closeContestWindowAction(dealId)));
+        startClosing(async () => setSettleError((await closeContestWindowAction(dealId)).error));
       }
     }, 250);
     return () => clearInterval(id);
@@ -147,7 +148,7 @@ function ContestWindow({ dealId, persona, closesAt, waivers }: VerdictPanelProps
           <button
             type="button"
             disabled={hasWaived || isClosing}
-            onClick={() => startClosing(async () => void (await waiveContestAction(dealId)))}
+            onClick={() => startClosing(async () => setSettleError((await waiveContestAction(dealId)).error))}
             className="press h-10 rounded-control bg-accent px-4 text-sm font-medium text-white disabled:opacity-60"
           >
             {hasWaived ? `Waiting for ${other} to agree` : "Settle now"}
@@ -161,6 +162,7 @@ function ContestWindow({ dealId, persona, closesAt, waivers }: VerdictPanelProps
             Contest the Verdict
           </button>
           <p className="text-sm text-muted">Settling early needs both Maya and Dev.</p>
+          {settleError && <p role="alert" className="w-full text-sm text-negative">{settleError}</p>}
         </div>
       ) : (
         <form action={contest} className="flex flex-col gap-3">

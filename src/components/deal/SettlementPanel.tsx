@@ -34,14 +34,21 @@ export function SettlementPanel({ dealId, state, plan, terms, capture, payout, r
   }, [state, payout, dealId]);
 
   const stamp = isVoided ? "Voided" : state === "paid" ? "Settled" : state === "payout_failed" ? "Payout failed" : "Settling";
-  const rows: [string, string, string?][] = isVoided
-    ? [["Captured from Maya", formatCents(0)], ["Released back to Maya", formatCents(terms.priceCents)]]
-    : [
-        ["Captured from Maya", formatCents(capture?.amountCents ?? ("captureCents" in plan ? plan.captureCents : 0)), capture?.captureId],
-        ["Released back to Maya", formatCents(returnedCents)],
-        ["Platform fee (5%)", formatCents("feeCents" in plan ? plan.feeCents : 0)],
-        ["Paid to Dev via PayPal Payouts", formatCents("payoutCents" in plan ? plan.payoutCents : 0), payout?.batchId],
-      ];
+  // Until PayPal confirms, the rows are the plan, not what happened.
+  const isPending = state === "settling";
+  const plannedCapture = "captureCents" in plan ? plan.captureCents : 0;
+  const rows: [string, string, string?][] =
+    isVoided || plan.kind === "void"
+      ? [
+          [isPending ? "To capture from Maya" : "Captured from Maya", formatCents(0)],
+          [isPending ? "To release back to Maya" : "Released back to Maya", formatCents(terms.priceCents)],
+        ]
+      : [
+          [isPending ? "To capture from Maya" : "Captured from Maya", formatCents(capture?.amountCents ?? plannedCapture), capture?.captureId],
+          [isPending ? "To release back to Maya" : "Released back to Maya", formatCents(capture ? returnedCents : terms.priceCents - plannedCapture)],
+          ["Platform fee (5%)", formatCents("feeCents" in plan ? plan.feeCents : 0)],
+          [isPending ? "To pay Dev via PayPal Payouts" : "Paid to Dev via PayPal Payouts", formatCents("payoutCents" in plan ? plan.payoutCents : 0), payout?.batchId],
+        ];
 
   return (
     <section aria-labelledby="settlement-heading" className="relative overflow-hidden rounded-card bg-surface p-6">
@@ -86,6 +93,12 @@ export function SettlementPanel({ dealId, state, plan, terms, capture, payout, r
       {state === "payout_failed" && (
         <p role="alert" className="mt-2 text-sm text-negative">
           PayPal declined the payout: {payout?.failureReason}. The capture stands; the payout needs attention.
+        </p>
+      )}
+      {state === "settling" && (
+        <p className="mt-2 text-sm text-muted">
+          PayPal hasn&apos;t confirmed this Settlement yet, so no money has moved. Retrying is safe: each PayPal call
+          carries an idempotency key, so nothing happens twice.
         </p>
       )}
       {state === "settling" && (
