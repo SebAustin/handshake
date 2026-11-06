@@ -46,7 +46,7 @@ async function DealScreen({ params }: { params: PageProps<"/deals/[id]">["params
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <header className="flex flex-col gap-3">
           <StageStrip deal={deal} />
-          <h1 className="font-serif text-3xl leading-tight tracking-tight lg:text-4xl">{dealTitle(deal.brief)}</h1>
+          <h1 className="font-serif text-2xl leading-tight tracking-tight lg:text-3xl">{dealTitle(deal.brief)}</h1>
           <p className="text-base">{nextStep(deal, persona)}</p>
         </header>
 

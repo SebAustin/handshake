@@ -38,7 +38,7 @@ export function VerdictPanel(props: VerdictPanelProps) {
       <p className="mt-3 font-serif text-2xl">
         {passed} of {verdict.results.length} criteria passed · {formatPercent(plan.passedBp)} of the price earned
       </p>
-      <PlanLine plan={plan} terms={terms} />
+      <PlanLine plan={plan} terms={terms} hasSettled={MONEY_MOVED.has(state)} />
 
       <ul className="mt-5 flex flex-col">
         {verdict.results.map((result) => {
@@ -76,14 +76,25 @@ export function VerdictPanel(props: VerdictPanelProps) {
   );
 }
 
-function PlanLine({ plan, terms }: { plan: SettlementPlan; terms: Terms }) {
+/** States in which Settlement has already reached PayPal, so the plan reads in the past tense. */
+const MONEY_MOVED = new Set<DealState>(["payout_pending", "paid", "payout_failed", "voided"]);
+
+function PlanLine({ plan, terms, hasSettled }: { plan: SettlementPlan; terms: Terms; hasSettled: boolean }) {
   if (plan.kind === "revision") return <p className="mt-1 text-muted">Nothing earned yet. Dev gets one revision.</p>;
-  if (plan.kind === "void") return <p className="mt-1 text-muted">Nothing earned. The Hold will be voided and Maya pays nothing.</p>;
+  if (plan.kind === "void") {
+    return (
+      <p className="mt-1 text-muted">
+        Nothing earned. {hasSettled ? "The Hold was voided and Maya paid nothing." : "The Hold will be voided and Maya pays nothing."}
+      </p>
+    );
+  }
+  const released = terms.priceCents - plan.captureCents;
   return (
     <p className="figures mt-1">
-      PayPal will capture {formatCents(plan.captureCents)} of the {formatCents(terms.priceCents)} held. Dev receives{" "}
-      {formatCents(plan.payoutCents)} after the {formatCents(plan.feeCents)} platform fee
-      {plan.kind === "partial" ? `, and ${formatCents(terms.priceCents - plan.captureCents)} goes back to Maya` : ""}.
+      {hasSettled ? "PayPal captured" : "PayPal will capture"} {formatCents(plan.captureCents)} of the{" "}
+      {formatCents(terms.priceCents)} held. Dev {hasSettled ? "receives" : "will receive"} {formatCents(plan.payoutCents)}{" "}
+      after the {formatCents(plan.feeCents)} platform fee
+      {plan.kind === "partial" ? `, and ${formatCents(released)} ${hasSettled ? "went" : "goes"} back to Maya` : ""}.
     </p>
   );
 }

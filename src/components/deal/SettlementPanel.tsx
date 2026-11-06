@@ -63,10 +63,10 @@ export function SettlementPanel({ dealId, state, plan, terms, capture, payout, r
 
       <dl className="mt-6 flex flex-col">
         {rows.map(([label, value, ref]) => (
-          <div key={label} className="flex flex-wrap items-baseline justify-between gap-2 border-t border-rule py-3">
-            <dt>
+          <div key={label} className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 border-t border-rule py-3">
+            <dt className="flex min-w-0 flex-col sm:flex-row sm:items-baseline sm:gap-2">
               {label}
-              {ref && <span className="figures ml-2 text-xs text-muted">{ref}</span>}
+              {ref && <span className="figures truncate text-xs text-muted">{ref}</span>}
             </dt>
             <dd className="figures text-lg font-bold">{value}</dd>
           </div>

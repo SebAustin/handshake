@@ -14,8 +14,8 @@ export function PersonaSwitcher({ persona }: { persona: Role }) {
   const [isPending, startTransition] = useTransition();
 
   return (
-    <fieldset className="flex flex-col gap-1" disabled={isPending}>
-      <legend className="mb-2 text-xs text-muted">Viewing as</legend>
+    <fieldset className="order-last flex w-full gap-1 lg:order-none lg:flex-col" disabled={isPending}>
+      <legend className="sr-only mb-2 text-xs text-muted lg:not-sr-only">Viewing as</legend>
       {OPTIONS.map((option) => {
         const isActive = option.role === persona;
         const tint = option.role === "client" ? "bg-client-tint text-client-ink" : "bg-freelancer-tint text-freelancer-ink";
@@ -25,7 +25,7 @@ export function PersonaSwitcher({ persona }: { persona: Role }) {
             type="button"
             aria-pressed={isActive}
             onClick={() => startTransition(() => setPersonaAction(option.role))}
-            className={`press flex h-9 items-center gap-2.5 rounded-control px-2 text-left ${
+            className={`press flex h-9 flex-1 items-center gap-2.5 rounded-control px-2 text-left lg:flex-none ${
               isActive ? "bg-raised text-ink" : "text-muted hover:text-ink"
             }`}
           >

@@ -19,7 +19,7 @@ interface AppShellProps {
 export function AppShell({ persona, recentDeals, currentDealId, currentPage, children }: AppShellProps) {
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="flex flex-col gap-8 px-4 pt-6 pb-4 lg:sticky lg:top-0 lg:h-dvh">
+      <aside className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border px-4 py-3 lg:sticky lg:top-0 lg:h-dvh lg:flex-col lg:flex-nowrap lg:items-stretch lg:justify-start lg:gap-8 lg:border-b-0 lg:pt-6 lg:pb-4">
         <Link href="/" className="press flex items-center gap-2.5 rounded-control px-2 py-1">
           <Mark />
           <span className="font-serif text-xl">Handshake</span>
@@ -30,12 +30,12 @@ export function AppShell({ persona, recentDeals, currentDealId, currentPage, chi
         <Link
           href="/ledger"
           aria-current={currentPage === "ledger" ? "page" : undefined}
-          className={`press -mt-4 flex items-baseline justify-between rounded-control px-2 py-1.5 text-sm ${
+          className={`press flex items-baseline justify-between rounded-control px-2 py-1.5 text-sm lg:-mt-4 ${
             currentPage === "ledger" ? "bg-raised text-ink" : "text-muted hover:text-ink"
           }`}
         >
           Ledger
-          <span className="text-xs text-muted">every PayPal movement</span>
+          <span className="hidden text-xs text-muted lg:inline">every PayPal movement</span>
         </Link>
 
         <nav aria-label="Deals" className="hidden min-h-0 flex-1 flex-col gap-1 overflow-y-auto lg:flex">

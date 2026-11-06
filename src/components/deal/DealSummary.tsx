@@ -7,7 +7,7 @@ export function DealSummary({ deal }: { deal: Deal }) {
   const criteria = deal.criteria.length ? deal.criteria : (deal.draft?.criteria ?? []);
 
   return (
-    <aside aria-label="The Deal" className="flex flex-col gap-3">
+    <aside aria-label="The Deal" className="flex flex-col gap-3 lg:sticky lg:top-8 lg:self-start">
       <section className="rounded-card bg-surface p-5">
         <h2 className="text-sm text-muted">Price</h2>
         {deal.terms ? (

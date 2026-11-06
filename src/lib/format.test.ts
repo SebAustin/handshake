@@ -15,9 +15,10 @@ describe("format", () => {
 
   test("titles a Deal from the Brief's first sentence", () => {
     expect(dealTitle("I need landing page copy for Brewlab, a coffee subscription. Friendly tone.")).toBe(
-      "Landing page copy for Brewlab, a coffee subscription",
+      "Landing page copy for Brewlab",
     );
-    expect(dealTitle("x".repeat(100)).length).toBe(64);
+    expect(dealTitle("I need a tagline. Short.")).toBe("A tagline");
+    expect(dealTitle("x".repeat(100)).length).toBe(48);
   });
 
   test("turns criterion ids into readable labels", () => {
