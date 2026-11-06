@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.98",
+    "@ai-sdk/mcp": "^2.0.92",
     "@neondatabase/serverless": "^1.2.0",
     "@paypal/paypal-js": "11.3.0",
     "ai": "^7.0.164",

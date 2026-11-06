@@ -44,6 +44,7 @@ export const deals = pgTable(
     contest: jsonb("contest").$type<Deal["contest"]>(),
     capture: jsonb("capture").$type<Deal["capture"]>(),
     payout: jsonb("payout").$type<Deal["payout"]>(),
+    receipt: jsonb("receipt").$type<Deal["receipt"]>(),
     version: integer("version").notNull().default(1),
     createdAt: createdAt(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

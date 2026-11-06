@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { refreshPayoutAction, settleAction } from "@/app/deals/work-actions";
-import type { SettlementPlan, Terms } from "@/deals/model";
-import type { DealState } from "@/deals/state-machine";
+import { issueReceiptAction, refreshPayoutAction, settleAction } from "@/app/deals/work-actions";
+import type { Role, SettlementPlan, Terms } from "@/deals/model";
+import type { DealState, Receipt } from "@/deals/state-machine";
 import { formatCents } from "@/lib/format";
 
 interface SettlementPanelProps {
@@ -13,12 +13,14 @@ interface SettlementPanelProps {
   terms: Terms;
   capture?: { captureId: string; amountCents: number };
   payout?: { batchId: string; failureReason?: string };
+  receipt?: Receipt;
+  persona: Role;
 }
 
 const PAYOUT_POLL_MS = 3000;
 
 /** Where the money went, computed by code from the Verdict, with PayPal's live payout status. */
-export function SettlementPanel({ dealId, state, plan, terms, capture, payout }: SettlementPanelProps) {
+export function SettlementPanel({ dealId, state, plan, terms, capture, payout, receipt, persona }: SettlementPanelProps) {
   const [isWorking, startWork] = useTransition();
   const [error, setError] = useState<string>();
   const isVoided = state === "voided";
@@ -70,6 +72,8 @@ export function SettlementPanel({ dealId, state, plan, terms, capture, payout }:
         ))}
       </dl>
 
+      {capture && <ReceiptLine dealId={dealId} receipt={receipt} canIssue={persona === "client"} />}
+
       {state === "payout_pending" && <p className="mt-2 text-sm text-muted">PayPal is processing the payout. This page updates on its own.</p>}
       {state === "payout_failed" && (
         <p role="alert" className="mt-2 text-sm text-negative">
@@ -95,5 +99,52 @@ export function SettlementPanel({ dealId, state, plan, terms, capture, payout }:
         </div>
       )}
     </section>
+  );
+}
+
+/** The paid PayPal invoice Maya gets as a receipt, issued through the PayPal Agent Toolkit. */
+function ReceiptLine({ dealId, receipt, canIssue }: { dealId: string; receipt?: Receipt; canIssue: boolean }) {
+  const [isIssuing, startIssuing] = useTransition();
+  const [error, setError] = useState<string>();
+
+  if (receipt) {
+    return (
+      <div className="flex flex-wrap items-baseline justify-between gap-2 border-t border-rule py-3">
+        <p>
+          Receipt for Maya
+          <span className="figures ml-2 text-xs text-muted">
+            {receipt.invoiceNumber} · {receipt.status.replaceAll("_", " ").toLowerCase()}
+          </span>
+        </p>
+        {receipt.viewUrl ? (
+          <a
+            href={receipt.viewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="press text-sm font-medium underline decoration-control underline-offset-4 hover:decoration-ink"
+          >
+            View the PayPal invoice
+          </a>
+        ) : (
+          <span className="text-sm text-muted">Issued on PayPal</span>
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-3 border-t border-rule py-3">
+      <p className="text-muted">No PayPal receipt yet.</p>
+      {canIssue && (
+        <button
+          type="button"
+          disabled={isIssuing}
+          onClick={() => startIssuing(async () => setError((await issueReceiptAction(dealId)).error))}
+          className="press h-9 rounded-control bg-raised px-3 text-sm disabled:opacity-60"
+        >
+          {isIssuing ? "Issuing…" : "Issue the receipt"}
+        </button>
+      )}
+      {error && <p role="alert" className="text-sm text-negative">{error}</p>}
+    </div>
   );
 }

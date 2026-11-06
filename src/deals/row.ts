@@ -6,7 +6,7 @@ import type { Deal } from "./state-machine";
 export type DealRow = Omit<typeof deals.$inferInsert, "version" | "createdAt" | "updatedAt">;
 type StoredRow = Pick<typeof deals.$inferSelect, keyof DealRow>;
 
-const OPTIONAL_PARTS = ["draft", "suggestedWeights", "pendingMandates", "mandates", "terms", "hold", "verdict", "verdictAt", "waivers", "plan", "contest", "capture", "payout"] as const;
+const OPTIONAL_PARTS = ["draft", "suggestedWeights", "pendingMandates", "mandates", "terms", "hold", "verdict", "verdictAt", "waivers", "plan", "contest", "capture", "payout", "receipt"] as const;
 
 export function dealToRow(deal: Deal): Required<DealRow> {
   return {
@@ -28,6 +28,7 @@ export function dealToRow(deal: Deal): Required<DealRow> {
     contest: deal.contest ?? null,
     capture: deal.capture ?? null,
     payout: deal.payout ?? null,
+    receipt: deal.receipt ?? null,
   };
 }
 

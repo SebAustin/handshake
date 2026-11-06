@@ -60,6 +60,15 @@ export interface Deal {
   readonly contest?: { readonly by: Role; readonly reason: string };
   readonly capture?: { readonly captureId: string; readonly amountCents: number };
   readonly payout?: { readonly batchId: string; readonly failureReason?: string };
+  /** The paid PayPal invoice issued to the Client as a receipt for what was captured. */
+  readonly receipt?: Receipt;
+}
+
+export interface Receipt {
+  readonly invoiceId: string;
+  readonly invoiceNumber: string;
+  readonly status: string;
+  readonly viewUrl?: string;
 }
 
 export type DealEvent =
@@ -80,7 +89,8 @@ export type DealEvent =
   | { type: "HOLD_VOIDED" }
   | { type: "PAYOUT_SENT"; batchId: string }
   | { type: "PAYOUT_SUCCEEDED" }
-  | { type: "PAYOUT_FAILED"; reason: string };
+  | { type: "PAYOUT_FAILED"; reason: string }
+  | { type: "RECEIPT_ISSUED"; receipt: Receipt };
 
 export type TransitionError = { code: "INVALID_TRANSITION" | "GUARD_FAILED"; message: string };
 export type TransitionResult = { ok: true; deal: Deal } | { ok: false; error: TransitionError };
@@ -104,6 +114,7 @@ const ALLOWED_FROM: Record<DealEvent["type"], readonly DealState[]> = {
   PAYOUT_SENT: ["payout_pending"],
   PAYOUT_SUCCEEDED: ["payout_pending"],
   PAYOUT_FAILED: ["payout_pending"],
+  RECEIPT_ISSUED: ["payout_pending", "paid", "payout_failed"],
 };
 
 export function createDeal(input: { id: string; brief: string }): Deal {
@@ -224,6 +235,10 @@ function apply(deal: Deal, event: DealEvent): Deal {
       const payout = required(deal.payout, "payout");
       return { ...deal, state: "payout_failed", payout: { ...payout, failureReason: event.reason } };
     }
+    case "RECEIPT_ISSUED":
+      required(deal.capture, "capture");
+      guard(!deal.receipt, "A receipt was already issued");
+      return { ...deal, receipt: event.receipt };
   }
 }
 

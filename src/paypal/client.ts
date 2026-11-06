@@ -124,6 +124,8 @@ export function createPayPalClient(config: PayPalClientConfig) {
   }
 
   return {
+    /** The cached OAuth token, for PayPal services that take the same credentials (the Agent Toolkit MCP server). */
+    accessToken: getAccessToken,
     async getOrder(orderId: string): Promise<CreatedOrder> {
       const order = await request({
         method: "GET",

@@ -97,6 +97,8 @@ function StagePanel({ deal, persona, messages, latestDelivery }: StagePanelProps
           terms={deal.terms}
           capture={deal.capture}
           payout={deal.payout}
+          receipt={deal.receipt}
+          persona={persona}
         />
       )}
       {deal.verdict && deal.plan && deal.terms && deal.state !== "revision_requested" && (

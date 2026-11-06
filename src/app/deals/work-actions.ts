@@ -8,6 +8,8 @@ import { contestWindow } from "@/settlement/contest-window";
 import { executeSettlement, refreshPayout } from "@/settlement/execute";
 import { getPersona, getServices } from "@/server/context";
 import { getPayPal, getPayoutReceiverEmail } from "@/server/paypal";
+import { withPayPalToolkit } from "@/toolkit/mcp";
+import { issueReceipt } from "@/toolkit/receipt";
 
 /**
  * Delivery → Verdict → Contest Window → Settlement. The Arbiter judges; the
@@ -97,8 +99,32 @@ export async function settleAction(dealId: string): Promise<WorkState> {
     return {};
   }
   const result = await executeSettlement(settlementDeps(), dealId);
+  if (result.ok && result.deal.capture) await receiptFor(dealId);
   refresh();
   return result.ok ? {} : { error: `Settlement didn't finish: ${result.error.message}` };
+}
+
+/** Retry for the receipt invoice; Maya's to ask for. */
+export async function issueReceiptAction(dealId: string): Promise<WorkState> {
+  const persona = await requirePersona(dealId, "client");
+  if (typeof persona === "object") return persona;
+  const result = await receiptFor(dealId);
+  refresh();
+  return result;
+}
+
+/** Issues the PayPal receipt invoice through the Agent Toolkit. Best-effort: money has already moved. */
+async function receiptFor(dealId: string): Promise<WorkState> {
+  try {
+    const paypal = getPayPal();
+    const result = await withPayPalToolkit({ accessToken: await paypal.accessToken() }, (toolkit) =>
+      issueReceipt({ deals: getServices().deals, toolkit, today: () => new Date().toISOString().slice(0, 10) }, dealId),
+    );
+    return result.ok ? {} : { error: result.error };
+  } catch (error) {
+    console.error(`Receipt failed for ${dealId}`, error);
+    return { error: "PayPal couldn't issue the receipt just now. Try again." };
+  }
 }
 
 export async function refreshPayoutAction(dealId: string): Promise<WorkState> {
