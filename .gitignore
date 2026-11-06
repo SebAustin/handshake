@@ -44,3 +44,4 @@ next-env.d.ts
 # local tooling
 /.remember/
 /spikes/results/
+/.taste-skill/

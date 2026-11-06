@@ -1,26 +1,134 @@
 @import "tailwindcss";
 
+/*
+ * Handshake tokens — "achromatic ledger" on contract paper.
+ * Chrome is ink on a paper-stone ground; the one data hue marks the main data
+ * (the Offers converging); colour elsewhere only signals a change.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  --ground: #f4f3f1;
+  --surface: #ffffff;
+  --raised: #ecebe8;
+  --border: #e3e1dd;
+  --rule: #efeeeb;
+  --control: #d2d0cb;
+  --text: #0a0a0a;
+  --muted: #66645f;
+  --accent: #141414;
+  --data: #1d5fbf;
+  --positive: #2e7d32;
+  --negative: #c4242a;
+  --warning: #92400e;
+  --stamp: #b3261e;
+
+  --pill-positive-bg: #dcfae5;
+  --pill-positive-ink: #04250e;
+  --pill-negative-bg: #ffedea;
+  --pill-negative-ink: #831c1e;
+  --pill-warning-bg: #fffbeb;
+  --pill-warning-ink: #92400e;
+  --pill-neutral-bg: #ecebe8;
+  --pill-neutral-ink: #3d3c39;
+
+  /* People: pale identity tints, never used on data */
+  --client-tint: #f3e6d8;
+  --client-ink: #6a3b12;
+  --freelancer-tint: #dcebe6;
+  --freelancer-ink: #164a3d;
+
+  --radius-card: 8px;
+  --radius-control: 6px;
+  --gap: 12px;
+  --pad: 24px;
+  --control-height: 36px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-border: var(--border);
+  --color-rule: var(--rule);
+  --color-control: var(--control);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-data: var(--data);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-stamp: var(--stamp);
+  --color-client-tint: var(--client-tint);
+  --color-client-ink: var(--client-ink);
+  --color-freelancer-tint: var(--freelancer-tint);
+  --color-freelancer-ink: var(--freelancer-ink);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --radius-card: var(--radius-card);
+  --radius-control: var(--radius-control);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--ground);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ground);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.figures {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Every pressable thing answers the press. */
+.press {
+  transition: transform 160ms var(--ease-out), background-color 160ms ease, color 160ms ease;
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+:focus-visible {
+  outline: 2px solid var(--data);
+  outline-offset: 2px;
+}
+
+/* Entrance for newly arrived negotiation messages and section content. */
+.rise {
+  animation: rise 320ms var(--ease-out) both;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: fade 200ms ease both;
+  }
+  .press:active {
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

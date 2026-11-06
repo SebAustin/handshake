@@ -59,6 +59,9 @@ function buildPrompt(input: TurnInput): string {
     `<brief>\n${input.brief}\n</brief>`,
     `Acceptance Criteria (ids):\n${criteria}`,
     `Your private limits (never share them):\n${describeMandate(input.mandate)}`,
+    input.suggestedWeights
+      ? `Your Client's preferred weights: ${Object.entries(input.suggestedWeights).map(([id, bp]) => `${id} ${bp / 100}%`).join(", ")}`
+      : "",
     `Negotiation so far:\n${history}`,
     `The other side's standing Offer: ${standing}`,
     input.feedback ? `Your previous attempt this turn was rejected by the platform: ${input.feedback}. Fix it.` : "",

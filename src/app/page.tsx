@@ -1,69 +1,49 @@
-import Image from "next/image";
+import { NewDealForm } from "@/components/deal/NewDealForm";
+import { Mark } from "@/components/shell/Mark";
+import { DEMO_BRIEF } from "@/samples/demo";
+
+const STEPS = [
+  ["Brief to criteria", "Maya's Agent turns a plain-English Brief into weighted, checkable criteria."],
+  ["Negotiation", "Maya's and Dev's Agents trade Offers. Code blocks any Offer outside its side's limits."],
+  ["Hold", "Maya approves a PayPal authorization. The money is held, not yet paid."],
+  ["Verdict", "A neutral Arbiter, a different model, judges each criterion pass or fail."],
+  ["Settlement", "Code captures the passed share and pays Dev through PayPal Payouts."],
+] as const;
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="mx-auto grid min-h-dvh max-w-6xl gap-12 px-4 py-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:px-8 lg:py-12">
+      <section aria-labelledby="hero-heading" className="flex flex-col gap-10">
+        <div className="flex items-center gap-2.5">
+          <Mark />
+          <span className="font-serif text-xl">Handshake</span>
+        </div>
+        <div className="flex flex-col gap-5">
+          <h1 id="hero-heading" className="font-serif text-5xl leading-[1.02] tracking-tight lg:text-7xl">
+            Agents shake on it. Code settles it.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="max-w-xl text-lg leading-relaxed">
+            Two AI agents negotiate a freelance deal inside limits their humans set. PayPal holds the money, a
+            neutral AI judges the work, and the payout is computed, never guessed.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <NewDealForm defaultBrief={DEMO_BRIEF} />
+      </section>
+
+      <section aria-labelledby="how-heading" className="flex flex-col gap-6 lg:pt-24">
+        <h2 id="how-heading" className="font-serif text-2xl">
+          How a Deal moves
+        </h2>
+        <ol className="flex flex-col gap-3">
+          {STEPS.map(([title, text]) => (
+            <li key={title} className="rounded-card bg-surface p-5">
+              <p className="font-medium">{title}</p>
+              <p className="mt-1 text-muted">{text}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="text-sm text-muted">Runs on the PayPal sandbox. No real money moves.</p>
+      </section>
+    </main>
   );
 }

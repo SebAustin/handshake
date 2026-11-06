@@ -234,3 +234,58 @@ describe("immutability", () => {
     });
   });
 });
+
+describe("drafting and Mandates", () => {
+  const SUGGESTED = { headline: 5000, tone: 2000, cta: 3000 };
+
+  test("a criteria draft is stored without leaving brief_drafted, and can be redrafted", () => {
+    const deal = run([
+      { type: "CRITERIA_DRAFTED", criteria: CRITERIA.slice(0, 2), suggestedWeights: { headline: 5000, tone: 5000 } },
+      { type: "CRITERIA_DRAFTED", criteria: CRITERIA, suggestedWeights: SUGGESTED },
+    ]);
+
+    expect(deal.state).toBe("brief_drafted");
+    expect(deal.draft).toEqual({ criteria: CRITERIA, suggestedWeights: SUGGESTED });
+  });
+
+  test("approving criteria keeps the suggested weights and clears the draft", () => {
+    const deal = run([
+      { type: "CRITERIA_DRAFTED", criteria: CRITERIA, suggestedWeights: SUGGESTED },
+      { type: "CRITERIA_APPROVED", criteria: CRITERIA, suggestedWeights: SUGGESTED },
+    ]);
+
+    expect(deal).toMatchObject({ state: "criteria_approved", suggestedWeights: SUGGESTED });
+    expect(deal.draft).toBeUndefined();
+  });
+
+  test("suggested weights must cover exactly the approved criteria", () => {
+    const result = transition(createDeal({ id: "d", brief: "b" }), {
+      type: "CRITERIA_APPROVED",
+      criteria: CRITERIA,
+      suggestedWeights: { headline: 10000 },
+    });
+
+    expect(result).toMatchObject({ ok: false, error: { code: "GUARD_FAILED" } });
+  });
+
+  test("each person sets their own Mandate before negotiation, and may change it", () => {
+    const deal = run([
+      { type: "CRITERIA_APPROVED", criteria: CRITERIA },
+      { type: "MANDATE_SET", mandate: CLIENT },
+      { type: "MANDATE_SET", mandate: { ...CLIENT, budgetCeilingCents: 15000 } },
+      { type: "MANDATE_SET", mandate: FREELANCER },
+    ]);
+
+    expect(deal.state).toBe("criteria_approved");
+    expect(deal.pendingMandates).toEqual({ client: { ...CLIENT, budgetCeilingCents: 15000 }, freelancer: FREELANCER });
+  });
+
+  test("Mandates are frozen once negotiation starts", () => {
+    const negotiating = run(TO_HELD.slice(0, 2));
+
+    expect(transition(negotiating, { type: "MANDATE_SET", mandate: CLIENT })).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_TRANSITION" },
+    });
+  });
+});

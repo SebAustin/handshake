@@ -8,6 +8,13 @@
       "when": 1793473872367,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794000439914,
+      "tag": "0001_drafts_and_pending_mandates",
+      "breakpoints": true
     }
   ]
 }

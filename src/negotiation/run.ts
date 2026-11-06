@@ -6,6 +6,7 @@ import {
   type Mandate,
   type Role,
   type Terms,
+  type Weights,
 } from "@/deals/model";
 import { checkTerms } from "@/mandates/check";
 import {
@@ -37,6 +38,8 @@ export interface TurnInput {
   standingOffer?: Terms;
   /** Why this Agent's previous attempt this turn was rejected. */
   feedback?: string;
+  /** The Client's preferred weights — given to the Client's Agent only. */
+  suggestedWeights?: Weights;
 }
 
 export type AgentTurn = (input: TurnInput) => Promise<AgentMove>;
@@ -49,6 +52,8 @@ export interface NegotiationInput {
   /** Called for every message, valid or not, in order — persist and stream from here. */
   onMessage: (message: NegotiationMessage) => Promise<void>;
   maxRounds?: number;
+  /** The Client's preferred weights, if any (the Client's Agent's opening position). */
+  suggestedWeights?: Weights;
 }
 
 type TurnResult = { kind: "continue" } | { kind: "done"; outcome: NegotiationOutcome };
@@ -94,6 +99,7 @@ async function playTurn({ input, role, round, maxRounds, transcript, standing }:
       transcript: [...transcript],
       standingOffer,
       feedback,
+      ...(role === "client" && input.suggestedWeights && { suggestedWeights: input.suggestedWeights }),
     });
     const message = checkMove(move, { role, round, mandate, criterionIds, standingOffer });
     await input.onMessage(message);

@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import type { Database } from "@/db/client";
 import { deals, ledgerEvents } from "@/db/schema";
 import { dealToRow, rowToDeal } from "./row";
@@ -92,7 +92,13 @@ export function createDealRepository(db: Database) {
     return { ok: false, error: { code: "CONFLICT", message: `Deal ${id} kept changing; gave up after retries` } };
   }
 
-  return { get, create, save, applyEvent };
+  /** Most recently changed Deals, for the sidebar. */
+  async function listRecent(limit: number): Promise<Deal[]> {
+    const rows = await db.select().from(deals).orderBy(desc(deals.updatedAt)).limit(limit);
+    return rows.map(rowToDeal);
+  }
+
+  return { get, create, save, applyEvent, listRecent };
 }
 
 export type DealRepository = ReturnType<typeof createDealRepository>;

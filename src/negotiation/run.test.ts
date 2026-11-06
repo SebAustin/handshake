@@ -36,7 +36,7 @@ function scripted(moves: AgentMove[]) {
   return { turn, seen };
 }
 
-async function negotiate(client: AgentMove[], freelancer: AgentMove[]) {
+async function negotiate(client: AgentMove[], freelancer: AgentMove[], suggestedWeights?: Terms["weights"]) {
   const c = scripted(client);
   const f = scripted(freelancer);
   const messages: { from: Role; kind: string; accepted: boolean; round: number }[] = [];
@@ -45,6 +45,7 @@ async function negotiate(client: AgentMove[], freelancer: AgentMove[]) {
     criteria: CRITERIA,
     mandates: { client: CLIENT, freelancer: FREELANCER },
     turns: { client: c.turn, freelancer: f.turn },
+    suggestedWeights,
     onMessage: async (m) => {
       messages.push({ from: m.from, kind: m.kind, accepted: m.accepted, round: m.round });
     },
@@ -78,6 +79,14 @@ describe("runNegotiation", () => {
     expect(clientSaw[0]).toMatchObject({ role: "client", mandate: CLIENT, standingOffer: undefined, round: 1 });
     expect(freelancerSaw[0]).toMatchObject({ role: "freelancer", mandate: FREELANCER, standingOffer: terms(10000) });
     expect(JSON.stringify(freelancerSaw[0])).not.toContain("budgetCeilingCents");
+  });
+
+  test("only the Client's Agent is told the Client's preferred weights", async () => {
+    const preferred = { headline: 8000, tone: 2000 };
+    const { clientSaw, freelancerSaw } = await negotiate([offer(terms(10000))], [accept], preferred);
+
+    expect(clientSaw[0].suggestedWeights).toEqual(preferred);
+    expect(freelancerSaw[0].suggestedWeights).toBeUndefined();
   });
 
   test("an out-of-Mandate Offer is rejected, never shown to the other side, and retried with feedback", async () => {

@@ -6,8 +6,10 @@ import type {
   FreelancerMandate,
   Role,
   SettlementPlan,
+  Mandate,
   Terms,
   Verdict,
+  Weights,
 } from "./model";
 
 /**
@@ -39,6 +41,12 @@ export interface Deal {
   readonly state: DealState;
   readonly brief: string;
   readonly criteria: readonly Criterion[];
+  /** The Client Agent's proposed criteria, awaiting the Client's approval. */
+  readonly draft?: { readonly criteria: readonly Criterion[]; readonly suggestedWeights: Weights };
+  /** The Client Agent's suggested weights for the approved criteria; the opening position in negotiation. */
+  readonly suggestedWeights?: Weights;
+  /** Mandates each person has set so far; frozen into `mandates` when negotiation starts. */
+  readonly pendingMandates?: { readonly client?: ClientMandate; readonly freelancer?: FreelancerMandate };
   readonly mandates?: { readonly client: ClientMandate; readonly freelancer: FreelancerMandate };
   readonly terms?: Terms;
   readonly hold?: { readonly orderId: string; readonly authorizationId?: string };
@@ -51,7 +59,9 @@ export interface Deal {
 }
 
 export type DealEvent =
-  | { type: "CRITERIA_APPROVED"; criteria: Criterion[] }
+  | { type: "CRITERIA_DRAFTED"; criteria: Criterion[]; suggestedWeights: Weights }
+  | { type: "CRITERIA_APPROVED"; criteria: Criterion[]; suggestedWeights?: Weights }
+  | { type: "MANDATE_SET"; mandate: Mandate }
   | { type: "NEGOTIATION_STARTED"; client: ClientMandate; freelancer: FreelancerMandate }
   | { type: "AGREEMENT_REACHED"; terms: Terms }
   | { type: "NEGOTIATION_FAILED" }
@@ -71,7 +81,9 @@ export type TransitionError = { code: "INVALID_TRANSITION" | "GUARD_FAILED"; mes
 export type TransitionResult = { ok: true; deal: Deal } | { ok: false; error: TransitionError };
 
 const ALLOWED_FROM: Record<DealEvent["type"], readonly DealState[]> = {
+  CRITERIA_DRAFTED: ["brief_drafted"],
   CRITERIA_APPROVED: ["brief_drafted"],
+  MANDATE_SET: ["criteria_approved"],
   NEGOTIATION_STARTED: ["criteria_approved"],
   AGREEMENT_REACHED: ["negotiating"],
   NEGOTIATION_FAILED: ["negotiating"],
@@ -120,8 +132,25 @@ function apply(deal: Deal, event: DealEvent): Deal {
       const ids = event.criteria.map((c) => c.id);
       guard(ids.length > 0, "A Deal needs at least one Acceptance Criterion");
       guard(new Set(ids).size === ids.length, "Acceptance Criteria ids must be unique");
-      return { ...deal, state: "criteria_approved", criteria: event.criteria };
+      if (event.suggestedWeights) {
+        const weightIds = Object.keys(event.suggestedWeights).sort();
+        guard(
+          JSON.stringify(weightIds) === JSON.stringify([...ids].sort()),
+          "Suggested weights must cover exactly the approved criteria",
+        );
+      }
+      return {
+        ...deal,
+        draft: undefined,
+        state: "criteria_approved",
+        criteria: event.criteria,
+        ...(event.suggestedWeights && { suggestedWeights: event.suggestedWeights }),
+      };
     }
+    case "CRITERIA_DRAFTED":
+      return { ...deal, draft: { criteria: event.criteria, suggestedWeights: event.suggestedWeights } };
+    case "MANDATE_SET":
+      return { ...deal, pendingMandates: { ...deal.pendingMandates, [event.mandate.role]: event.mandate } };
     case "NEGOTIATION_STARTED": {
       const gaps = findAgreementGaps(event.client, event.freelancer);
       guard(gaps.length === 0, `Mandates can never agree: ${gaps.map((g) => g.message).join("; ")}`);
