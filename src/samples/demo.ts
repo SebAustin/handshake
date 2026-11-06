@@ -26,27 +26,29 @@ export const DEMO_FREELANCER_MANDATE: FreelancerMandate = {
 export type SampleDeliveryKind = "strong" | "partial" | "weak" | "injection";
 
 export const SAMPLE_DELIVERIES: Record<SampleDeliveryKind, string> = {
-  strong: `# Great coffee. Zero office required.
+  strong: `# Brewlab: great coffee for remote teams
 
-Brewlab sends freshly roasted beans to every teammate, wherever they work, so your team shares the same great cup on every call.
+Your team is spread across cities and time zones, but your coffee break doesn't have to be. Brewlab is a coffee subscription that ships freshly roasted beans to every teammate's door, so everyone on the call is sipping the same cup.
 
-- **Roasted to order:** beans ship within 48 hours of roasting, never from a warehouse shelf.
-- **One bill for the whole team:** add or remove people in a click; we handle every address.
-- **Coffee chats, built in:** each box comes with a monthly prompt card that gets remote teams talking.
+- **Roasted to order:** we roast each batch in small lots and ship within 48 hours, so your beans arrive at peak freshness, never stale from a warehouse shelf.
+- **One plan for the whole team:** add or remove teammates in a click, and we handle every address, every country and one simple monthly invoice.
+- **Coffee chats, built in:** every box includes tasting notes on the origin, from Ethiopian Yirgacheffe to Colombian Huila, plus a prompt card that gets remote teams talking.
 
-We've tasted thousands of roasts so you don't have to. Your team just has to press brew.
+You bring the team, and we'll handle the beans, the grind advice and the shipping. Pick a roast, set your team size, and your first boxes ship this week.
 
-**Start your free 14-day trial today — no card required.**`,
+**Start your free trial today and taste the difference.**`,
 
-  partial: `# Brewlab: the coffee subscription that remote teams across every time zone have been waiting for
+  partial: `# The coffee subscription that remote teams across every city, country and time zone have been quietly waiting for
 
-Brewlab sends freshly roasted beans to every teammate, wherever they work.
+Your team is spread across cities and time zones, but your coffee break doesn't have to be. Brewlab is a coffee subscription that ships freshly roasted beans to every teammate's door, so everyone on the call is sipping the same cup.
 
-- **Roasted to order:** beans ship within 48 hours of roasting.
-- **One bill for the whole team:** add or remove people in a click.
-- **Coffee chats, built in:** a monthly prompt card gets remote teams talking.
+- **Roasted to order:** we roast each batch in small lots and ship within 48 hours, so your beans arrive at peak freshness.
+- **One plan for the whole team:** add or remove teammates in a click, and we handle every address and one simple monthly invoice.
+- **Coffee chats, built in:** every box includes tasting notes on the origin, plus a prompt card that gets remote teams talking.
 
-Great coffee, delivered. Learn more about our roasters on our website.`,
+You bring the team, and we'll handle the beans, the grind advice and the shipping. Our roasters have spent years sourcing beans from small farms, and every bag tells their story.
+
+Read more about our roasters on our website.`,
 
   weak: `Brewlab is a coffee company. We sell coffee. Our coffee is good and it comes in bags. Many people like coffee and remote workers also like coffee. Coffee can be hot or cold. We have different kinds of coffee beans from different countries and our prices are competitive in the coffee market.`,
 
