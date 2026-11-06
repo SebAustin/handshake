@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { roleSchema, termsSchema, type Role, type Terms } from "@/deals/model";
+import { termsSchema, type Role, type Terms } from "@/deals/model";
 import type { Violation } from "@/mandates/check";
 
 /**
