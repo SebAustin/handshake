@@ -16,7 +16,8 @@
     "test:int": "VITEST_INTEGRATION=1 node --env-file=.env.local ./node_modules/vitest/vitest.mjs run",
     "check:criteria": "tsx --env-file=.env.local scripts/check-criteria.ts",
     "check:agents": "tsx --env-file=.env.local scripts/check-agents.ts",
-    "inspect:deal": "tsx --env-file=.env.local scripts/inspect-deal.ts"
+    "inspect:deal": "tsx --env-file=.env.local scripts/inspect-deal.ts",
+    "seed:deal": "tsx --env-file=.env.local scripts/seed-deal.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.98",
