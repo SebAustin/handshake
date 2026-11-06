@@ -11,11 +11,12 @@ interface AppShellProps {
   persona: Role;
   recentDeals: readonly Deal[];
   currentDealId?: string;
+  currentPage?: "ledger";
   children: ReactNode;
 }
 
 /** Open-plane shell: a labelled sidebar on the page ground, the canvas beside it. */
-export function AppShell({ persona, recentDeals, currentDealId, children }: AppShellProps) {
+export function AppShell({ persona, recentDeals, currentDealId, currentPage, children }: AppShellProps) {
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[240px_1fr]">
       <aside className="flex flex-col gap-8 px-4 pt-6 pb-4 lg:sticky lg:top-0 lg:h-dvh">
@@ -25,6 +26,17 @@ export function AppShell({ persona, recentDeals, currentDealId, children }: AppS
         </Link>
 
         <PersonaSwitcher persona={persona} />
+
+        <Link
+          href="/ledger"
+          aria-current={currentPage === "ledger" ? "page" : undefined}
+          className={`press -mt-4 flex items-baseline justify-between rounded-control px-2 py-1.5 text-sm ${
+            currentPage === "ledger" ? "bg-raised text-ink" : "text-muted hover:text-ink"
+          }`}
+        >
+          Ledger
+          <span className="text-xs text-muted">every PayPal movement</span>
+        </Link>
 
         <nav aria-label="Deals" className="hidden min-h-0 flex-1 flex-col gap-1 overflow-y-auto lg:flex">
           <div className="mb-1 flex items-center justify-between px-2">

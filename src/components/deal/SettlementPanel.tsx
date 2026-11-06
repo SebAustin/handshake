@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { issueReceiptAction, refreshPayoutAction, settleAction } from "@/app/deals/work-actions";
 import type { Role, SettlementPlan, Terms } from "@/deals/model";
@@ -73,6 +74,13 @@ export function SettlementPanel({ dealId, state, plan, terms, capture, payout, r
       </dl>
 
       {capture && <ReceiptLine dealId={dealId} receipt={receipt} canIssue={persona === "client"} />}
+
+      <Link
+        href={`/ledger?deal=${dealId}`}
+        className="mt-3 inline-block text-sm text-muted underline decoration-control underline-offset-4 hover:text-ink"
+      >
+        Trace every PayPal call for this Deal in the Ledger
+      </Link>
 
       {state === "payout_pending" && <p className="mt-2 text-sm text-muted">PayPal is processing the payout. This page updates on its own.</p>}
       {state === "payout_failed" && (

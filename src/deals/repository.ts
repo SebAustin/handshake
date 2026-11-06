@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "@/db/client";
 import { deals, ledgerEvents } from "@/db/schema";
 import { dealToRow, rowToDeal } from "./row";
@@ -98,7 +98,30 @@ export function createDealRepository(db: Database) {
     return rows.map(rowToDeal);
   }
 
-  return { get, create, save, applyEvent, listRecent };
+  async function getMany(ids: readonly string[]): Promise<Deal[]> {
+    if (ids.length === 0) return [];
+    const rows = await db.select().from(deals).where(inArray(deals.id, [...ids]));
+    return rows.map(rowToDeal);
+  }
+
+  /** Newest ledger events of the given types, across all Deals. */
+  async function listLedgerEvents(types: readonly string[], limit: number) {
+    return db
+      .select({
+        id: ledgerEvents.id,
+        dealId: ledgerEvents.dealId,
+        type: ledgerEvents.type,
+        payload: ledgerEvents.payload,
+        paypalRef: ledgerEvents.paypalRef,
+        createdAt: ledgerEvents.createdAt,
+      })
+      .from(ledgerEvents)
+      .where(inArray(ledgerEvents.type, [...types]))
+      .orderBy(desc(ledgerEvents.createdAt), desc(ledgerEvents.id))
+      .limit(limit);
+  }
+
+  return { get, create, save, applyEvent, listRecent, getMany, listLedgerEvents };
 }
 
 export type DealRepository = ReturnType<typeof createDealRepository>;
