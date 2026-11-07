@@ -18,9 +18,7 @@ The demo has no accounts. Switch between **Maya** (the Client) and **Dev** (the 
 
 1. As Maya, write a Brief (or keep the sample) and let her Agent draft the criteria. Approve them.
 2. Set both Mandates (Maya's budget, Dev's minimum price) and start the negotiation. Watch the two Agents' Offers converge.
-3. As Maya, **Hold** the agreed price with PayPal. Use a PayPal sandbox *personal* account:
-   - Email: `<sandbox buyer email>` <!-- TODO before submitting: fill in, or point judges to Devpost testing notes -->
-   - Password: `<sandbox buyer password>`
+3. As Maya, **Hold** the agreed price with PayPal. Log in with a PayPal sandbox *personal* account: judges will find one in the Devpost testing notes, and anyone else can create one in the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/accounts). It's test money only.
 4. As Dev, load a sample Delivery (*Strong*, *Partial*, *Weak* or *Prompt injection*) and submit it. The Arbiter judges it.
 5. A 30-second Contest Window opens. Click **Settle now** as both people, or contest. Then watch PayPal capture, release, pay out and issue a receipt.
 6. Open the **Ledger** to see every PayPal call with PayPal's own reference.
