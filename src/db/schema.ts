@@ -5,6 +5,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   smallint,
   text,
   timestamp,
@@ -103,4 +104,15 @@ export const ledgerEvents = pgTable(
     createdAt: createdAt(),
   },
   (table) => [index("ledger_events_deal_idx").on(table.dealId), index("ledger_events_paypal_ref_idx").on(table.paypalRef)],
+);
+
+/** Fixed-window request counters for rate limiting (src/ratelimit). Old windows are pruned opportunistically. */
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    key: text("key").notNull(),
+    windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (table) => [primaryKey({ columns: [table.key, table.windowStart] })],
 );

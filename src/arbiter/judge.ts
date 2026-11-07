@@ -47,7 +47,7 @@ export async function judgeDelivery(input: {
     system: SYSTEM_PROMPT,
     prompt: [
       `Acceptance Criteria:\n${input.criteria.map((c) => `- ${c.id}: ${c.text}`).join("\n")}`,
-      `<delivery>\n${delivery}\n</delivery>`,
+      `<delivery>\n${defuseDeliveryTags(delivery)}\n</delivery>`,
       "Return exactly one result per criterion id.",
     ].join("\n\n"),
     output: Output.object({ schema }),
@@ -56,8 +56,20 @@ export async function judgeDelivery(input: {
   assertCoversEveryCriterion(output.results.map((r) => r.criterionId), ids);
   return {
     attempt: input.attempt,
-    results: output.results.map((r) => ({ ...r, evidence: isQuotedFrom(r.evidence, delivery) ? r.evidence : "" })),
+    results: output.results.map((r) => ({
+      ...r,
+      evidence: isQuotedFrom(r.evidence, delivery) || isQuotedFrom(r.evidence, defuseDeliveryTags(delivery)) ? r.evidence : "",
+    })),
   };
+}
+
+/**
+ * The Delivery sits inside <delivery> tags. A Delivery that writes its own
+ * </delivery> could end the data block early and continue as if it were our
+ * instructions, so any delivery tag inside it is swapped for a look-alike.
+ */
+export function defuseDeliveryTags(text: string): string {
+  return text.replace(/<(\/?)(\s*delivery)(\s*)>/gi, "‹$1$2$3›").replace(/<(\/?\s*delivery\b)/gi, "‹$1");
 }
 
 function assertCoversEveryCriterion(judged: readonly string[], ids: readonly string[]): void {

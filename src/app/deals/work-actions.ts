@@ -10,6 +10,7 @@ import { getPersona, getServices } from "@/server/context";
 import { getPayPal, getPayoutReceiverEmail } from "@/server/paypal";
 import { withPayPalToolkit } from "@/toolkit/mcp";
 import { issueReceipt } from "@/toolkit/receipt";
+import { COST, limitMessage, rateLimit } from "@/server/rate-limit";
 
 /**
  * Delivery → Verdict → Contest Window → Settlement. The Arbiter judges; the
@@ -33,6 +34,8 @@ export async function submitDeliveryAction(dealId: string, _prev: WorkState, for
   const { deals, deliveries } = getServices();
   const deal = (await deals.get(dealId))?.deal;
   if (deal?.state !== "held" && deal?.state !== "revision_requested") return { error: "This Deal isn't waiting for a Delivery." };
+  const allowed = await rateLimit("ai", COST.arbiter);
+  if (!allowed.ok) return { error: limitMessage(allowed) };
 
   const attempt = deal.state === "held" ? 1 : 2;
   await deliveries.save(dealId, attempt, content.data);
@@ -47,6 +50,8 @@ export async function submitDeliveryAction(dealId: string, _prev: WorkState, for
 /** Retry for when the Arbiter failed after a Delivery was submitted. */
 export async function judgeAgainAction(dealId: string): Promise<WorkState> {
   if (!dealIdSchema.safeParse(dealId).success) return { error: "Unknown Deal." };
+  const allowed = await rateLimit("ai", COST.arbiter);
+  if (!allowed.ok) return { error: limitMessage(allowed) };
   const result = await runArbiter(dealId);
   refresh();
   return result;

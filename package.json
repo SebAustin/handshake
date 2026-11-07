@@ -18,7 +18,8 @@
     "check:agents": "tsx --env-file=.env.local scripts/check-agents.ts",
     "inspect:deal": "tsx --env-file=.env.local scripts/inspect-deal.ts",
     "seed:deal": "tsx --env-file=.env.local scripts/seed-deal.ts",
-    "clean:test-deals": "tsx --env-file=.env.local scripts/clean-test-deals.ts"
+    "clean:test-deals": "tsx --env-file=.env.local scripts/clean-test-deals.ts",
+    "eval:arbiter": "VITEST_EVAL=1 node --env-file=.env.local ./node_modules/vitest/vitest.mjs run src/arbiter"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.98",

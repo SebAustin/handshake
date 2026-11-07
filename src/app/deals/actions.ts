@@ -8,6 +8,7 @@ import { deriveCriteria } from "@/briefs/derive-criteria";
 import { MAX_DEADLINE_HOURS, roleSchema, type Mandate, type Role } from "@/deals/model";
 import { createDeal } from "@/deals/state-machine";
 import { getPersona, getServices, PERSONA_COOKIE } from "@/server/context";
+import { COST, limitMessage, rateLimit } from "@/server/rate-limit";
 
 /**
  * Server Actions behind the Deal screen. Every input is validated here; every
@@ -30,6 +31,8 @@ export async function setPersonaAction(role: Role): Promise<void> {
 export async function createDealAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const brief = z.string().trim().min(30).max(4000).safeParse(formData.get("brief"));
   if (!brief.success) return { error: "Describe the work in at least 30 characters." };
+  const allowed = await rateLimit("deal", COST.newDeal);
+  if (!allowed.ok) return { error: limitMessage(allowed) };
 
   const id = `d-${crypto.randomUUID().replaceAll("-", "").slice(0, 10)}`;
   await getServices().deals.create(createDeal({ id, brief: brief.data }));
@@ -43,6 +46,8 @@ export async function draftCriteriaAction(dealId: string): Promise<ActionState> 
   const { deals } = getServices();
   const stored = await deals.get(dealIdSchema.parse(dealId));
   if (!stored) return { error: "This Deal no longer exists." };
+  const allowed = await rateLimit("ai", COST.draftCriteria);
+  if (!allowed.ok) return { error: limitMessage(allowed) };
 
   try {
     const { criteria, suggestedWeights } = await deriveCriteria({ brief: stored.deal.brief });

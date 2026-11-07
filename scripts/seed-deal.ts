@@ -9,15 +9,8 @@
 import { createDatabase } from "../src/db/client";
 import { createDealRepository } from "../src/deals/repository";
 import { createDeal, type DealEvent } from "../src/deals/state-machine";
-import { DEMO_BRIEF, DEMO_CLIENT_MANDATE, DEMO_FREELANCER_MANDATE } from "../src/samples/demo";
+import { DEMO_BRIEF, DEMO_CLIENT_MANDATE, DEMO_CRITERIA as CRITERIA, DEMO_FREELANCER_MANDATE } from "../src/samples/demo";
 
-const CRITERIA = [
-  { id: "word-count-range", text: "The landing page copy is between 120 and 199 words in total, counting headline, body and call to action." },
-  { id: "punchy-headline", text: "The copy opens with a single headline of 10 words or fewer that mentions Brewlab, coffee or remote teams." },
-  { id: "three-concrete-benefits", text: "The copy presents exactly three distinct benefits, each naming something specific about the subscription." },
-  { id: "free-trial-cta", text: "The copy ends with a clear call to action that uses the words 'free trial' and an imperative verb." },
-  { id: "friendly-expert-tone", text: "The copy addresses the reader directly ('you'/'your') and includes at least one specific coffee detail." },
-];
 const WEIGHTS = { "word-count-range": 1500, "punchy-headline": 2000, "three-concrete-benefits": 2500, "free-trial-cta": 2000, "friendly-expert-tone": 2000 };
 const TERMS = { priceCents: 10_000, deadlineHours: 30, weights: WEIGHTS };
 

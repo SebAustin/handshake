@@ -2,6 +2,7 @@ import { createAgentTurn } from "@/agents/agent-turn";
 import type { NegotiationMessage, NegotiationOutcome } from "@/negotiation/protocol";
 import { runNegotiation } from "@/negotiation/run";
 import { getServices } from "@/server/context";
+import { COST, limitMessage, rateLimit } from "@/server/rate-limit";
 
 /**
  * Runs a whole negotiation in one streaming request (PLAN.md, Nov 6). Each
@@ -26,6 +27,14 @@ export async function POST(_request: Request, ctx: RouteContext<"/api/deals/[id]
   const { client, freelancer } = stored.deal.pendingMandates ?? {};
   if (!client || !freelancer) {
     return Response.json({ error: "Both Mandates must be set first" }, { status: 409 });
+  }
+  // Checked before NEGOTIATION_STARTED, so a refused request leaves the Deal ready to try again.
+  const allowed = await rateLimit("ai", COST.negotiation);
+  if (!allowed.ok) {
+    return Response.json(
+      { error: limitMessage(allowed) },
+      { status: 429, headers: { "Retry-After": String(allowed.retryAfterSeconds) } },
+    );
   }
   const started = await deals.applyEvent(id, { type: "NEGOTIATION_STARTED", client, freelancer });
   if (!started.ok) return Response.json({ error: started.error.message }, { status: 409 });

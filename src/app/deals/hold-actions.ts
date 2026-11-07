@@ -7,6 +7,7 @@ import { PayPalApiError } from "@/paypal/client";
 import { dealTitle } from "@/lib/format";
 import { getPersona, getServices } from "@/server/context";
 import { getPayPal } from "@/server/paypal";
+import { COST, limitMessage, rateLimit } from "@/server/rate-limit";
 
 /**
  * The Hold (ADR 0002): Maya approves a PayPal AUTHORIZE order for exactly the
@@ -28,6 +29,8 @@ export async function createHoldOrderAction(dealId: string): Promise<HoldResult>
 
   if (deal.state === "hold_pending" && deal.hold) return { ok: true, orderId: deal.hold.orderId };
   if (deal.state !== "agreed") return { ok: false, error: "The Hold can only be placed right after agreement." };
+  const allowed = await rateLimit("deal", COST.holdOrder);
+  if (!allowed.ok) return { ok: false, error: limitMessage(allowed) };
 
   try {
     const returnUrl = `${await origin()}/deals/${dealId}`;
