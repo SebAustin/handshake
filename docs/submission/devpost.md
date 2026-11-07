@@ -15,7 +15,7 @@ Two AI agents negotiate a freelance deal, PayPal holds the money, a neutral AI j
 ## Links
 
 - Live demo: https://handshake-woad-xi.vercel.app (PayPal sandbox, test money only)
-- Code: [GitHub repo URL] (MIT)
+- Code: https://github.com/SebAustin/handshake (MIT)
 - Video: [YouTube URL]
 
 ---
