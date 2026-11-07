@@ -123,8 +123,8 @@ Days 1–3 done (Oct 31–Nov 1): PayPal client + sandbox spike, state machine, 
 
 ## 8. Submission checklist
 
-- [ ] Public GitHub repo, MIT LICENSE visible in About
-- [ ] README: problem, features, architecture, **AI tools used and how** (Claude Sonnet/Opus via AI SDK + AI Gateway; PayPal Agent Toolkit via MCP), setup/run, sandbox test credentials
-- [ ] Hosted demo URL working logged-out
+- [x] Public GitHub repo, MIT LICENSE visible in About
+- [ ] README: problem, features, architecture, **AI tools used and how** (Claude Sonnet/Opus via AI SDK + AI Gateway; PayPal Agent Toolkit via MCP), setup/run, sandbox test credentials (all done except the sandbox buyer login for judges)
+- [x] Hosted demo URL working logged-out
 - [ ] YouTube video public, < 3 min, no third-party music
 - [ ] Devpost text description + "built during the hackathon" note

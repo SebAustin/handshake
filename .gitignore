@@ -45,3 +45,8 @@ next-env.d.ts
 /.remember/
 /spikes/results/
 /.taste-skill/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/

@@ -19,7 +19,8 @@
     "inspect:deal": "tsx --env-file=.env.local scripts/inspect-deal.ts",
     "seed:deal": "tsx --env-file=.env.local scripts/seed-deal.ts",
     "clean:test-deals": "tsx --env-file=.env.local scripts/clean-test-deals.ts",
-    "eval:arbiter": "VITEST_EVAL=1 node --env-file=.env.local ./node_modules/vitest/vitest.mjs run src/arbiter"
+    "eval:arbiter": "VITEST_EVAL=1 node --env-file=.env.local ./node_modules/vitest/vitest.mjs run src/arbiter",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.98",
@@ -35,6 +36,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^24.19.2",
     "@types/react": "^19",
