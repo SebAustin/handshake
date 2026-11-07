@@ -19,7 +19,7 @@ export function NewDealForm({ defaultBrief }: { defaultBrief: string }) {
         minLength={30}
         maxLength={4000}
         defaultValue={defaultBrief}
-        className="w-full resize-y rounded-card border border-border bg-surface p-4 text-base leading-relaxed"
+        className="min-h-56 w-full resize-y rounded-card border border-border bg-surface p-4 text-base leading-relaxed sm:min-h-0"
       />
       {state.error && (
         <p role="alert" className="text-sm text-negative">
@@ -30,7 +30,7 @@ export function NewDealForm({ defaultBrief }: { defaultBrief: string }) {
         <button
           type="submit"
           disabled={isPending}
-          className="press h-11 rounded-control bg-accent px-5 text-sm font-medium text-white disabled:opacity-60"
+          className="press h-11 shrink-0 whitespace-nowrap rounded-control bg-accent px-5 text-sm font-medium text-white disabled:opacity-60"
         >
           {isPending ? "Opening the Deal…" : "Open the Deal"}
         </button>
