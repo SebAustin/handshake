@@ -78,6 +78,13 @@ describe("receiptInvoiceArgs", () => {
     expect(item.name.length).toBeLessThan(200);
   });
 
+  test("addresses the receipt to the payer's email when known", () => {
+    const args = receiptInvoiceArgs(capturedPartial(), "2026-11-09", "maya@personal.example.com");
+    expect(args.primary_recipients).toEqual([
+      { billing_info: { name: { given_name: "Maya", surname: "(Client)" }, email_address: "maya@personal.example.com" } },
+    ]);
+  });
+
   test("refuses a Deal with no capture", () => {
     expect(() => receiptInvoiceArgs(dealIn([true, true]), "2026-11-09")).toThrow(/no capture/i);
   });
@@ -123,7 +130,10 @@ describe("issueReceipt", () => {
   });
 
   test.each([
-    ["DRAFT", ["search_invoicing", "send_invoice", "record_payment_for_invoice", "get_invoice"]],
+    [
+      "DRAFT",
+      ["search_invoicing", "delete_invoice", "create_invoice", "send_invoice", "record_payment_for_invoice", "get_invoice"],
+    ],
     ["SENT", ["search_invoicing", "record_payment_for_invoice", "get_invoice"]],
     ["MARKED_AS_PAID", ["search_invoicing", "get_invoice"]],
   ])("resumes an earlier attempt that left the invoice %s", async (status, calls) => {

@@ -19,6 +19,8 @@ export interface ReceiptDeps {
   toolkit: ToolkitClient;
   /** Today's date as yyyy-MM-dd. */
   today: () => string;
+  /** The Client's PayPal email (the account that approved the Hold). PayPal won't send an invoice without one. */
+  recipientEmail?: string;
 }
 
 export type ReceiptResult = { ok: true; deal: Deal } | { ok: false; error: string };
@@ -31,7 +33,7 @@ const PAID_STATUSES = new Set(["PAID", "MARKED_AS_PAID"]);
 const RECEIPT_STATES = new Set<Deal["state"]>(["payout_pending", "paid", "payout_failed"]);
 
 /** The `create_invoice` arguments for a Deal's receipt: one line, for exactly what was captured. */
-export function receiptInvoiceArgs(deal: Deal, invoiceDate: string): Record<string, unknown> {
+export function receiptInvoiceArgs(deal: Deal, invoiceDate: string, recipientEmail?: string): Record<string, unknown> {
   const { capture, terms, verdict } = deal;
   if (!capture || !terms) throw new Error(`Deal ${deal.id} has no capture to receipt`);
   const passed = verdict?.results.filter((r) => r.passed).length ?? 0;
@@ -48,7 +50,14 @@ export function receiptInvoiceArgs(deal: Deal, invoiceDate: string): Record<stri
       `Receipt for Handshake Deal ${deal.id}. The Arbiter found ${passed} of ${total} criteria met, so ` +
       `${formatCents(capture.amountCents)} of the ${formatCents(terms.priceCents)} Hold was captured` +
       (released > 0 ? ` and ${formatCents(released)} was released back to you.` : "."),
-    primary_recipients: [{ billing_info: { name: { given_name: "Maya", surname: "(Client)" } } }],
+    primary_recipients: [
+      {
+        billing_info: {
+          name: { given_name: "Maya", surname: "(Client)" },
+          ...(recipientEmail && { email_address: recipientEmail }),
+        },
+      },
+    ],
     items: [
       {
         name: truncate(dealTitle(deal.brief), ITEM_NAME_MAX),
@@ -73,8 +82,15 @@ export async function issueReceipt(deps: ReceiptDeps, dealId: string): Promise<R
   const existing = await findByNumber(deps.toolkit, invoiceNumber);
   let invoiceId = existing?.id;
   let status = existing?.status;
+  if (invoiceId && status === "DRAFT") {
+    // An unsent draft from a failed attempt may be missing what PayPal needs to send it; start that step over.
+    await deps.toolkit.call("delete_invoice", { invoice_id: invoiceId });
+    invoiceId = undefined;
+  }
   if (!invoiceId) {
-    invoiceId = findInvoiceId(await deps.toolkit.call("create_invoice", receiptInvoiceArgs(deal, today)));
+    invoiceId = findInvoiceId(
+      await deps.toolkit.call("create_invoice", receiptInvoiceArgs(deal, today, deps.recipientEmail)),
+    );
     if (!invoiceId) return { ok: false, error: "PayPal created the receipt but returned no invoice id." };
     status = "DRAFT";
   }

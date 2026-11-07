@@ -15,6 +15,8 @@ export const orderSchema = z.object({
   id: z.string(),
   status: z.string(),
   links: z.array(linkSchema).default([]),
+  /** Present once a buyer has approved the order. */
+  payer: z.object({ email_address: z.string().optional() }).optional(),
 });
 
 export const authorizedOrderSchema = z.object({

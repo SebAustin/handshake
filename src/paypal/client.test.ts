@@ -76,6 +76,20 @@ describe("access token", () => {
   });
 });
 
+describe("getOrder", () => {
+  test("reports who approved the order, when PayPal says", async () => {
+    const { client } = makeClient(() =>
+      jsonResponse(200, { id: "O1", status: "COMPLETED", links: [], payer: { email_address: "maya@personal.example.com" } }),
+    );
+    expect(await client.getOrder("O1")).toMatchObject({ id: "O1", payerEmail: "maya@personal.example.com" });
+  });
+
+  test("leaves the payer out before approval", async () => {
+    const { client } = makeClient(() => jsonResponse(200, { id: "O1", status: "CREATED", links: [] }));
+    expect((await client.getOrder("O1")).payerEmail).toBeUndefined();
+  });
+});
+
 describe("createAuthorizeOrder", () => {
   test("creates an AUTHORIZE order with an idempotency key and returns the approval link", async () => {
     const { client, apiCalls } = makeClient(() =>

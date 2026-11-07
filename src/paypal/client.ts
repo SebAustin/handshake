@@ -44,6 +44,8 @@ export interface CreatedOrder {
   id: string;
   status: string;
   approveUrl: string | undefined;
+  /** The PayPal account that approved the order, once it has been approved. */
+  payerEmail?: string;
 }
 
 export interface Authorization {
@@ -275,7 +277,8 @@ export type PayPalClient = ReturnType<typeof createPayPalClient>;
 
 function toCreatedOrder(order: z.infer<typeof orderSchema>): CreatedOrder {
   const approve = order.links.find((link) => link.rel === "payer-action" || link.rel === "approve");
-  return { id: order.id, status: order.status, approveUrl: approve?.href };
+  const payerEmail = order.payer?.email_address;
+  return { id: order.id, status: order.status, approveUrl: approve?.href, ...(payerEmail && { payerEmail }) };
 }
 
 async function readJson(response: Response, path: string): Promise<unknown> {

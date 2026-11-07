@@ -117,8 +117,13 @@ export async function issueReceiptAction(dealId: string): Promise<WorkState> {
 async function receiptFor(dealId: string): Promise<WorkState> {
   try {
     const paypal = getPayPal();
+    const orderId = (await getServices().deals.get(dealId))?.deal.hold?.orderId;
+    const recipientEmail = orderId ? (await paypal.getOrder(orderId)).payerEmail : undefined;
     const result = await withPayPalToolkit({ accessToken: await paypal.accessToken() }, (toolkit) =>
-      issueReceipt({ deals: getServices().deals, toolkit, today: () => new Date().toISOString().slice(0, 10) }, dealId),
+      issueReceipt(
+        { deals: getServices().deals, toolkit, today: () => new Date().toISOString().slice(0, 10), recipientEmail },
+        dealId,
+      ),
     );
     return result.ok ? {} : { error: result.error };
   } catch (error) {

@@ -120,7 +120,7 @@ export function HoldPanel({ dealId, state, priceCents, clientId, canPay, authori
         <div className="mt-4 flex flex-col gap-4">
           <p className="max-w-prose">
             Approve a PayPal authorization for <strong className="figures">{formatCents(priceCents)}</strong>. Your
-            money is held, not paid. Dev starts work once it&apos;s held, and you only pay for the criteria his
+            money is held, not paid. Dev starts work once it&apos;s held, and you only pay for the criteria the
             Delivery passes.
           </p>
           <div className="flex flex-wrap items-center gap-4">
