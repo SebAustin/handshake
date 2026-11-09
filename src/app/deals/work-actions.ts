@@ -80,6 +80,15 @@ export async function contestAction(dealId: string, _prev: WorkState, formData: 
   return {};
 }
 
+/** The Client releases a contested Hold in full; the demo's stand-in for a human review. */
+export async function releaseHoldAction(dealId: string): Promise<WorkState> {
+  const persona = await requirePersona(dealId, "client");
+  if (typeof persona === "object") return persona;
+  const released = await getServices().deals.applyEvent(dealId, { type: "HOLD_RELEASED" });
+  if (!released.ok) return { error: released.error.message };
+  return settleAction(dealId);
+}
+
 /** Closes the window once it has elapsed (or both waived), then settles. Safe to call from both sides. */
 export async function closeContestWindowAction(dealId: string): Promise<WorkState> {
   if (!dealIdSchema.safeParse(dealId).success) return { error: "Unknown Deal." };

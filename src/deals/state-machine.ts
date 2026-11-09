@@ -85,6 +85,8 @@ export type DealEvent =
   | { type: "CONTEST_WAIVED"; by: Role }
   | { type: "CONTEST_FILED"; by: Role; reason: string }
   | { type: "CONTEST_WINDOW_CLOSED" }
+  /** The Client releases a contested Hold in full; stands in for the human review step. */
+  | { type: "HOLD_RELEASED" }
   | { type: "CAPTURED"; captureId: string; amountCents: number }
   | { type: "HOLD_VOIDED" }
   | { type: "PAYOUT_SENT"; batchId: string }
@@ -109,6 +111,7 @@ const ALLOWED_FROM: Record<DealEvent["type"], readonly DealState[]> = {
   CONTEST_FILED: ["judged"],
   CONTEST_WAIVED: ["judged"],
   CONTEST_WINDOW_CLOSED: ["judged"],
+  HOLD_RELEASED: ["contested"],
   CAPTURED: ["settling"],
   HOLD_VOIDED: ["settling"],
   PAYOUT_SENT: ["payout_pending"],
@@ -211,6 +214,8 @@ function apply(deal: Deal, event: DealEvent): Deal {
       const plan = required(deal.plan, "plan");
       return { ...deal, state: plan.kind === "revision" ? "revision_requested" : "settling" };
     }
+    case "HOLD_RELEASED":
+      return { ...deal, state: "settling", plan: { kind: "void", passedBp: required(deal.plan, "plan").passedBp, released: true } };
     case "CAPTURED": {
       const plan = required(deal.plan, "plan");
       guard(plan.kind === "full" || plan.kind === "partial", `Plan is "${plan.kind}", nothing to capture`);

@@ -17,7 +17,7 @@ The AI acting on behalf of exactly one Client or Freelancer, bounded by that per
 _Avoid_: Bot, assistant
 
 **Mandate**:
-The limits a person grants their Agent — e.g. budget ceiling, minimum rate, required Acceptance Criteria, maximum scope, deadline. Anything outside it requires the human.
+The limits a person grants their Agent — e.g. budget ceiling, minimum price, deadline, and floors or caps on criterion weights. Anything outside it requires the human.
 _Avoid_: Settings, preferences, policy
 
 **Arbiter**:
@@ -75,7 +75,7 @@ What the Freelancer submits against a Deal. A Deal may have at most one revised 
 _Avoid_: Submission, deliverable, output
 
 **Verdict**:
-The Arbiter's judgment of a Delivery against each Acceptance Criterion — pass, partial, or fail — with reasons.
+The Arbiter’s judgment of a Delivery against each Acceptance Criterion — pass or fail — with reasons and quoted evidence.
 _Avoid_: Review, grade, score, decision
 
 **Contest Window**:
@@ -83,5 +83,5 @@ The short period after a Verdict during which either person may Contest; Settlem
 _Avoid_: Grace period, cooling-off
 
 **Contest**:
-A person's objection to a Verdict within the contest window; it freezes Settlement and hands the Deal to a human.
+A person’s objection to a Verdict within the Contest Window; it freezes Settlement until the Client releases the Hold in full (a human review is not built yet).
 _Avoid_: Dispute (reserved for PayPal disputes), appeal, complaint

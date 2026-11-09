@@ -20,7 +20,7 @@ The demo has no accounts. Switch between **Maya** (the Client) and **Dev** (the 
 2. Set both Mandates (Maya's budget, Dev's minimum price) and start the negotiation. Watch the two Agents' Offers converge.
 3. As Maya, **Hold** the agreed price with PayPal. Log in with a PayPal sandbox *personal* account: judges will find one in the Devpost testing notes, and anyone else can create one in the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/accounts). It's test money only.
 4. As Dev, load a sample Delivery (*Strong*, *Partial*, *Weak* or *Prompt injection*) and submit it. The Arbiter judges it.
-5. A 30-second Contest Window opens. Click **Settle now** as both people, or contest. Then watch PayPal capture, release, pay out and issue a receipt.
+5. A 30-second Contest Window opens. Click **Settle now** as both people, or contest (then **Release the Hold** as Maya closes the Deal). Then watch PayPal capture, release, pay out and issue a receipt.
 6. Open the **Ledger** to see every PayPal call with PayPal's own reference.
 
 ## How it works
@@ -63,7 +63,7 @@ flowchart LR
 - **Mandates are enforced in code**, not by asking the model nicely. An Offer outside a Mandate is rejected before the other Agent sees it.
 - **The Arbiter resists prompt injection.** The Delivery is wrapped as untrusted data, and any `<delivery>` tag inside it is defused so it can't close the block early. `pnpm eval:arbiter` runs four live attacks against Claude Opus (a hidden comment, closing the block, a pre-filled verdict, claimed authority); each earns 0 criteria, while honest work still passes.
 - **Every PayPal call is idempotent.** Each carries a `PayPal-Request-Id` derived from the Deal, so a retry after a crash never charges or pays twice.
-- **A Contest Window** of 30 seconds lets either side freeze Settlement before any money moves; settling early needs both sides.
+- **A Contest Window** of 30 seconds lets either side freeze Settlement before any money moves; settling early needs both sides. A contested Deal stays frozen until the Client releases the Hold in full (a human review step isn't built yet).
 - **An audit Ledger** records every state change and PayPal call in the same transaction as the change, and checks itself: held = captured + released, captured = paid out + fee.
 - **Rate limits** on the public demo cap model calls and new PayPal orders per visitor and overall.
 

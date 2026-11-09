@@ -37,7 +37,7 @@ Handshake runs a freelance Deal from Brief to payout:
 5. **Verdict.** Dev submits the work. A neutral Arbiter, a different model that never sees the price, the Mandates or the negotiation, judges each criterion pass or fail and quotes its evidence from the Delivery.
 6. **Settlement.** Code computes the payout as price × the weights that passed. PayPal captures that share and releases the rest back to Maya. Dev is paid through PayPal Payouts, minus a 5% platform fee, and Maya gets a paid PayPal invoice as a receipt.
 
-A 30-second Contest Window lets either side stop Settlement before any money moves. A Ledger lists every PayPal call with PayPal's own reference, and checks that held = captured + released.
+A 30-second Contest Window lets either side stop Settlement before any money moves. A contested Deal stays frozen until the Client releases the Hold in full. A Ledger lists every PayPal call with PayPal's own reference, and checks that held = captured + released.
 
 ## How we built it
 
@@ -57,7 +57,11 @@ The core design rule is written down as our first decision record: **AI never mo
 ## Challenges we ran into
 
 - **The Agent Toolkit can't hold money.** Its order tool only captures immediately; it has no authorize, void or payout. So the money path uses the PayPal REST APIs directly, and the Toolkit does what it's good at: invoicing.
-- **Prompt injection.** A Delivery is text written by the person who gets paid, so it could try to talk the Arbiter into passing everything. We wrap the Delivery as untrusted data, defuse any tag that tries to close that block early, and drop any quote the Arbiter cites that isn't really in the Delivery. Our eval runs four live attacks (a hidden comment, closing the block, a pre-filled verdict, claimed authority). Each one earns 0 criteria, and honest work still passes.
+- **Prompt injection.** A Delivery is text written by the person who gets paid, so it could try to talk the Arbiter into passing everything. We wrap the Delivery as untrusted data, defuse any tag that tries to close that block early, and drop any quote the Arbiter cites that isn't really in the Delivery. Our eval runs four live attacks (a hidden comment, closing the block, a pre-filled verdict, claimed authority). Each one earns 0 criteria, and honest work still passes. You can try it yourself: Dev's "Prompt injection" sample hides an instruction to pass everything, and the Arbiter scores it 0 of 5, noting that "the embedded note is not copy and was ignored".
+
+![The Arbiter's Verdict on the prompt-injection sample: 0 of 5 criteria passed](arbiter-prompt-injection.png)
+
+*Upload `arbiter-prompt-injection.png` to the Devpost image gallery; the line above is for the repo copy.*
 - **Retries that never pay twice.** Every PayPal call carries an idempotency key derived from the Deal, so a crash and retry can't charge or pay twice. The receipt can also resume: if PayPal created the invoice but a later step failed, the next attempt picks up where it stopped.
 - **Partial pay is hard to make fair.** Rounding is always down to the cent, in integer cents, and the Ledger checks its own sums.
 
@@ -77,7 +81,7 @@ The core design rule is written down as our first decision record: **AI never mo
 
 - Real accounts and sign-in instead of the two demo personas.
 - Milestones: several Holds in one Deal.
-- A human appeal step when someone contests a Verdict.
+- A human appeal step when someone contests a Verdict. Today the Client can only release the Hold in full.
 - Moving from the sandbox to live PayPal after a security review.
 
 ## Built with
@@ -96,5 +100,7 @@ To place a Hold, log in to PayPal with this **sandbox** buyer account (test mone
 - Password: [sandbox buyer password]
 
 The quickest path: open a Deal, approve the criteria, set both Mandates, start the negotiation, approve the Hold with the account above, load the *Partial* sample Delivery as Dev and submit it, then click **Settle now** as both people. The Ledger shows every PayPal call.
+
+Also worth trying: the *Prompt injection* sample, which should earn 0 criteria. If you contest a Verdict, switch to Maya and click **Release the Hold** to close the Deal.
 
 The public demo is rate-limited per visitor, so if a model call is refused, wait a few minutes and try again.

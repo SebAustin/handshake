@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
-import { closeContestWindowAction, contestAction, waiveContestAction, type WorkState } from "@/app/deals/work-actions";
+import { closeContestWindowAction, contestAction, releaseHoldAction, waiveContestAction, type WorkState } from "@/app/deals/work-actions";
 import type { Criterion, Role, SettlementPlan, Terms, Verdict } from "@/deals/model";
 import type { DealState } from "@/deals/state-machine";
 import { criterionLabel, formatCents, formatPercent } from "@/lib/format";
@@ -69,9 +69,11 @@ export function VerdictPanel(props: VerdictPanelProps) {
       {state === "contested" && props.contest && (
         <p className="mt-4 rounded-card bg-ground p-4">
           {props.contest.by === "client" ? "Maya" : "Dev"} contested this Verdict: “{props.contest.reason}”. Settlement is
-          frozen and the Deal goes to a human. No money has moved.
+          frozen and no money has moved.
+          {" "}A human review isn&apos;t built yet, so in this demo Maya can release the Hold in full.
         </p>
       )}
+      {state === "contested" && props.persona === "client" && <ReleaseHold dealId={props.dealId} />}
     </section>
   );
 }
@@ -81,6 +83,13 @@ const MONEY_MOVED = new Set<DealState>(["payout_pending", "paid", "payout_failed
 
 function PlanLine({ plan, terms, hasSettled }: { plan: SettlementPlan; terms: Terms; hasSettled: boolean }) {
   if (plan.kind === "revision") return <p className="mt-1 text-muted">Nothing earned yet. Dev gets one revision.</p>;
+  if (plan.kind === "void" && plan.released) {
+    return (
+      <p className="mt-1 text-muted">
+        Maya released the Hold after the Contest. {hasSettled ? "PayPal voided it and Maya paid nothing." : "PayPal will void it and Maya pays nothing."}
+      </p>
+    );
+  }
   if (plan.kind === "void") {
     return (
       <p className="mt-1 text-muted">
@@ -96,6 +105,25 @@ function PlanLine({ plan, terms, hasSettled }: { plan: SettlementPlan; terms: Te
       after the {formatCents(plan.feeCents)} platform fee
       {plan.kind === "partial" ? `, and ${formatCents(released)} ${hasSettled ? "went" : "goes"} back to Maya` : ""}.
     </p>
+  );
+}
+
+function ReleaseHold({ dealId }: { dealId: string }) {
+  const [isReleasing, startReleasing] = useTransition();
+  const [error, setError] = useState<string>();
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-3">
+      <button
+        type="button"
+        disabled={isReleasing}
+        onClick={() => startReleasing(async () => setError((await releaseHoldAction(dealId)).error))}
+        className="press h-10 rounded-control bg-accent px-4 text-sm font-medium text-white disabled:opacity-60"
+      >
+        {isReleasing ? "Releasing with PayPal…" : "Release the Hold"}
+      </button>
+      <p className="text-sm text-muted">PayPal voids the authorization. Dev is paid nothing.</p>
+      {error && <p role="alert" className="w-full text-sm text-negative">{error}</p>}
+    </div>
   );
 }
 

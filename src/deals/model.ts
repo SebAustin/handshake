@@ -79,4 +79,5 @@ export type SettlementPlan =
   | { kind: "full"; captureCents: number; feeCents: number; payoutCents: number; passedBp: number }
   | { kind: "partial"; captureCents: number; feeCents: number; payoutCents: number; passedBp: number }
   | { kind: "revision"; passedBp: 0 }
-  | { kind: "void"; passedBp: number };
+  /** `released`: the Client released a contested Hold in full, whatever the Verdict earned. */
+  | { kind: "void"; passedBp: number; released?: true };

@@ -195,6 +195,31 @@ describe("contest and failures", () => {
     expect(transition(contested, { type: "CONTEST_WINDOW_CLOSED" })).toMatchObject({ ok: false });
   });
 
+  test("releasing a contested Hold replaces the plan with a full void", () => {
+    const contested = run([
+      ...TO_HELD,
+      { type: "DELIVERY_SUBMITTED" },
+      { type: "VERDICT_ISSUED", verdict: verdict(1, [true, false, false]) },
+      { type: "CONTEST_FILED", by: "client", reason: "Not what we agreed" },
+    ]);
+
+    const released = run([{ type: "HOLD_RELEASED" }, { type: "HOLD_VOIDED" }], contested);
+
+    expect(released.state).toBe("voided");
+    expect(released.plan).toMatchObject({ kind: "void", released: true });
+    expect(released.plan?.passedBp).toBe(contested.plan?.passedBp);
+  });
+
+  test("the Hold can only be released from a contested Deal", () => {
+    const judged = run([
+      ...TO_HELD,
+      { type: "DELIVERY_SUBMITTED" },
+      { type: "VERDICT_ISSUED", verdict: verdict(1, [true, true, true]) },
+    ]);
+
+    expect(transition(judged, { type: "HOLD_RELEASED" })).toMatchObject({ ok: false, error: { code: "INVALID_TRANSITION" } });
+  });
+
   test("a failed payout is recorded with PayPal's reason", () => {
     const failed = run([
       ...TO_HELD,

@@ -57,7 +57,7 @@ async function LedgerScreen({ searchParams }: { searchParams: PageProps<"/ledger
             {filteredDeal ? dealTitle(filteredDeal.brief) : "Ledger"}
           </h1>
           <p className="max-w-prose text-base">
-            Each line is a call code made to PayPal, with PayPal&apos;s own reference so you can check it in the sandbox.
+            Each line is a call our code made to PayPal, with PayPal&apos;s own reference so you can check it in the sandbox.
             No model ever made one of these calls.
           </p>
         </header>
