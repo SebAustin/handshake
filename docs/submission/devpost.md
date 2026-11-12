@@ -49,7 +49,7 @@ A 30-second Contest Window lets either side stop Settlement before any money mov
 - **Claude Opus 5.5** is the Arbiter. We use a different model on purpose, so the judge is not the same model that negotiated.
 - **Next.js 16** (App Router, Server Actions), React 19, Tailwind CSS 4, TypeScript.
 - **Neon Postgres** with Drizzle ORM. Hosted on **Vercel**.
-- **Vitest and Playwright**: 148 unit tests, 9 integration tests, a live 5-case Arbiter eval and 2 end-to-end tests.
+- **Vitest and Playwright**: 150 unit tests, 9 integration tests, a live 5-case Arbiter eval and 2 end-to-end tests.
 - Built with **Claude Code** as a pair programmer.
 
 The core design rule is written down as our first decision record: **AI never moves money.** The models produce Offers and Verdicts. A pure state machine and integer-cents math decide every amount, and only plain code calls PayPal's money endpoints.
