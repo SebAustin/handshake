@@ -6,6 +6,8 @@ Built during the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/) (
 
 **Live demo:** https://handshake-woad-xi.vercel.app (PayPal sandbox, test money only)
 
+**Demo video (2:30):** https://youtu.be/44wsToYedrg
+
 ## The problem
 
 Paying a freelancer you've never met means one side takes the risk: pay up front and hope, or deliver first and hope. Escrow fixes the trust problem but adds paperwork, and "was the work good enough?" still ends in an argument.

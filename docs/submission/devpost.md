@@ -10,13 +10,13 @@ Handshake
 
 ## Tagline (one line)
 
-Two AI agents negotiate a freelance deal, PayPal holds the money, a neutral AI judges the work, and code settles it.
+AI agents negotiate freelance deals inside limits you set. PayPal holds the money, a neutral AI judges the work against agreed criteria, and code pays only for what was delivered.
 
 ## Links
 
 - Live demo: https://handshake-woad-xi.vercel.app (PayPal sandbox, test money only)
 - Code: https://github.com/SebAustin/handshake (MIT)
-- Video: [YouTube URL]
+- Video: https://youtu.be/44wsToYedrg
 
 ---
 
