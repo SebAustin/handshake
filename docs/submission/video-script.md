@@ -43,21 +43,18 @@ Handshake: AI agents negotiate, PayPal holds the money, code settles
 **Description**
 
 ```
-Handshake is our entry for the PayPal AI Hackathon.
+Two AI agents negotiate a freelance deal inside limits their humans set. PayPal holds the money, a neutral AI judges the work, and code, never a model, settles it. Our PayPal AI Hackathon entry.
 
-Two AI agents negotiate a freelance deal inside limits their humans set. PayPal holds the money, a neutral AI judges the work, and code, never a model, settles it.
-
-In this demo:
 0:00 The problem
-0:25 The Brief and the checkable criteria
-0:42 Private limits, the negotiation and the PayPal Hold
-1:15 Live: the Delivery and the Arbiter's Verdict
-1:39 Live: Settlement, Payout and the PayPal receipt
+0:25 The Brief and the criteria
+0:42 Limits, negotiation and the PayPal Hold
+1:15 The Delivery and the Verdict
+1:39 Settlement, Payout and receipt
 2:09 The Ledger
 
-Built with: PayPal Orders v2 (AUTHORIZE), Payments v2, Payouts, JS SDK v6 and the PayPal Agent Toolkit; Claude Sonnet 5.5 and Claude Opus 5.5 through the Vercel AI SDK; Next.js 16, Neon Postgres and Vercel.
+Built with PayPal Orders v2, Payouts, JS SDK v6 and the Agent Toolkit; Claude Sonnet 5.5 and Opus 5.5.
 
-Live demo (PayPal sandbox, test money only): https://handshake-woad-xi.vercel.app
+Live demo (sandbox, test money): https://handshake-woad-xi.vercel.app
 Code (MIT): https://github.com/SebAustin/handshake
 ```
 
